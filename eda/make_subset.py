@@ -19,8 +19,9 @@ num_rows = df.nrow
 
 print("Dataframe has {} rows".format(num_rows))
 
-sample_size = int(num_rows * 0.005)
-print("Taking a 0.5% sample ({} elements)...".format(sample_size))
+percent_sample = 1.
+sample_size = int(num_rows * percent_sample / 100)
+print("Taking a {}% sample ({} elements)...".format(percent_sample, sample_size))
 
 sample = random.sample(range(1, num_rows), sample_size)
 rows_i = robjects.IntVector(sample)
