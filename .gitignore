@@ -2,3 +2,5 @@
 .Rhistory
 .RData
 .Ruserdata
+eda/subset_with_sensor_locations_and_census.csv
+.DS_Store
