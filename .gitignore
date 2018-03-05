@@ -3,5 +3,8 @@
 .RData
 .Ruserdata
 eda/subset_with_sensor_locations_and_census.csv
-eda/subet_sensor_census_readyToImpute.csv
+eda/subet_sensor_census_toImpute.csv
 .DS_Store
+eda/.ipynb_checkpoints
+eda/random_subset.csv
+eda/subset_with_sensor_locations_and_census.csv
