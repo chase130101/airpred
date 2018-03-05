@@ -2,9 +2,11 @@
 .Rhistory
 .RData
 .Ruserdata
-eda/subset_with_sensor_locations_and_census.csv
-eda/subet_sensor_census_toImpute.csv
 .DS_Store
 eda/.ipynb_checkpoints
-eda/random_subset.csv
-eda/subset_with_sensor_locations_and_census.csv
+data/census_data.csv
+data/subet_sensor_census_toImpute.csv
+data/random_subset_0_5p.csv
+data/random_subset_1p_1half.csv
+data/random_subset_1p_2half.csv
+data/subset_with_sensor_locations_and_census.csv
