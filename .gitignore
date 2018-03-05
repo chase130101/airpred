@@ -5,6 +5,7 @@
 .DS_Store
 eda/.ipynb_checkpoints
 impute/.ipynb_checkpoints
+modeling/.ipynb_checkpoints
 data/census_data.csv
 data/subet_sensor_census_toImpute.csv
 data/random_subset_0_5p.csv
