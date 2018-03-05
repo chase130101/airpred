@@ -8,6 +8,9 @@ impute/.ipynb_checkpoints
 data/census_data.csv
 data/subet_sensor_census_toImpute.csv
 data/random_subset_0_5p.csv
+data/sensor_census_imputed_rf.csv
 data/random_subset_1p_1half.csv
 data/random_subset_1p_2half.csv
 data/subset_with_sensor_locations_and_census.csv
+data/sensor_census_imputed_rf.csv
+data/sensor_census_imputed_mean.csv
