@@ -7,7 +7,7 @@ eda/.ipynb_checkpoints
 impute/.ipynb_checkpoints
 modeling/.ipynb_checkpoints
 data/census_data.csv
-data/subet_sensor_census_toImpute.csv
+data/subset_sensor_census_toImpute.csv
 data/random_subset_0_5p.csv
 data/sensor_census_imputed_rf.csv
 data/random_subset_1p_1half.csv
