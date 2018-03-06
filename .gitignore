@@ -3,6 +3,7 @@
 .RData
 .Ruserdata
 .DS_Store
+.ipynb_checkpoints
 eda/.ipynb_checkpoints
 impute/.ipynb_checkpoints
 modeling/.ipynb_checkpoints
