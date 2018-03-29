@@ -1,11 +1,12 @@
 #Load packages
-library(dplyr)
+require(dplyr)
+require(data.table)
 require(missForest)
 
 
 #Read data
-pollution_data = read.csv('random_subset.csv')
-location_census_data = read.csv('sensor_locations_with_census.csv')
+pollution_data = fread('random_subset.csv')
+location_census_data = fread('sensor_locations_with_census.csv')
 
 #Join census data with pollution data
 full_data = left_join(pollution_data, location_census_data, by = 'site')
@@ -19,11 +20,18 @@ full_data$date = as.Date(full_data$date)
 #Extract month from date
 full_data$month = as.numeric(format(full_data$date,"%m"))
 
-#Move month variable to the front of the data frame
-full_data = full_data %>% select(site, year, month, everything())
-
 #Redefine year as number of years from starting point
 full_data$year = full_data$year - min(full_data$year)
+
+#Engineer other date features
+full_data$cumulative_month = full_data$year*12 + full_data$month 
+full_data$day_of_year = as.numeric(format(full_data$date,"%d")) + 30*(full_data$month-1)
+full_data$cumulative_day =  365*(full_data$year) + full_data$day_of_year
+full_data$month = as.factor(full_data$month)
+
+#Move date variables to the front of the data frame
+full_data = full_data %>% select(site, year, month, cumulative_month,
+                                 day_of_year, cumulative_day, everything())
 
 #Create latitude, longitude interaction variable 
 full_data$Lat_Lon_int = full_data$Lat * full_data$Lon 
@@ -50,44 +58,19 @@ variables_to_drop = c('White', 'Black', 'Native', 'Asian', 'Islander', 'Other', 
 #Remove variables to drop from data
 full_data = select(full_data, -one_of(variables_to_drop))
 
-#This is only needed if the data is not sorted
-#full_data = full_data %>% arrange(site, date)
 
-#Create vector of all site ids
-sites = unique(full_data$site)
-n = length(sites)
+#Remove variables that we do not want to impute
+impute_variables = select(full_data, -c(site, date, MonitorData))
+other_variables = select(full_data, c(site, date, MonitorData))
 
-#Sites for train data
-train_sites = sort(sample(sites, ceiling(.8*n)))
+#Impute missing values using random forest
 
-#Split data into train and test
-train_data = full_data %>% filter(site %in% train_sites) 
-test_data = full_data %>% filter(!(site %in% train_sites))
+missforest_imputation = missForest(impute_variables, maxiter = 10, ntree = 25, 
+                                   mtry = 10, variablewise = F,
+                                   decreasing = F, verbose = T, replace = T)
 
-#Split test and train into predictors and non-predictors
-x_train = select(train_data, -c(site, date, MonitorData))
-y_train = select(train_data, c(site, date, MonitorData))
-
-x_test = select(test_data, -c(site, date, MonitorData))
-y_test = select(test_data, c(site, date, MonitorData))
-
-#Impute missing values with random forest
-#Impute train predictors 
-xtrain_missforest = missForest(x_train, maxiter = 10, ntree = 25, mtry = 10, variablewise = F,
-                                       decreasing = F, verbose = T, replace = T)
-
-imputed_xtrain_rf = xtrain_missforest$ximp
-imputed_train_rf = cbind(y_train, imputed_xtrain_rf)
-
-#Attach imputed train predictors to test predictors, then impute test predictors 
-x_test_with_imputed_train = rbind(imputed_xtrain_rf, x_test)
-full_missforest = missForest(x_test_with_imputed_train, maxiter = 10, ntree = 25, mtry = 10, 
-                                  variablewise = F, decreasing = F, verbose = T, replace = T)
-
-#Removed previously attached train data
-imputed_xtest_rf = full_missforest$ximp[-(1:nrow(imputed_xtrain_rf)),]
-imputed_test_rf = cbind(y_test, imputed_xtest_rf)
+cat('Normalized OOB Error', missforest_imputation$OOBerror)
+imputed_data_rf = cbind(other_variables, missforest_imputation$ximp)
 
 #Write to csv for modeling in python
-write.csv(imputed_train_rf, '../data/imputed_train_rf.csv', row.names = F)
-write.csv(imputed_test_rf, '../data/imputed_test_rf.csv', row.names = F)
+fwrite(imputed_data_rf, 'imputed_data_rf.csv')

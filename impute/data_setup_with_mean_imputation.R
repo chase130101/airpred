@@ -1,10 +1,11 @@
 #Load packages
-library(dplyr)
+require(dplyr)
+require(data.table)
 
 
 #Read data
-pollution_data = read.csv('random_subset.csv')
-location_census_data = read.csv('sensor_locations_with_census.csv')
+pollution_data = fread('random_subset.csv')
+location_census_data = fread('sensor_locations_with_census.csv')
 
 #Join census data with pollution data
 full_data = left_join(pollution_data, location_census_data, by = 'site')
@@ -18,11 +19,18 @@ full_data$date = as.Date(full_data$date)
 #Extract month from date
 full_data$month = as.numeric(format(full_data$date,"%m"))
 
-#Move month variable to the front of the data frame
-full_data = full_data %>% select(site, year, month, everything())
-
 #Redefine year as number of years from starting point
 full_data$year = full_data$year - min(full_data$year)
+
+#Engineer other date features
+full_data$cumulative_month = full_data$year*12 + full_data$month 
+full_data$day_of_year = as.numeric(format(full_data$date,"%d")) + 30*(full_data$month-1)
+full_data$cumulative_day =  365*(full_data$year) + full_data$day_of_year
+full_data$month = as.factor(full_data$month)
+
+#Move date variables to the front of the data frame
+full_data = full_data %>% select(site, year, month, cumulative_month,
+                                 day_of_year, cumulative_day, everything())
 
 #Create latitude, longitude interaction variable 
 full_data$Lat_Lon_int = full_data$Lat * full_data$Lon 
@@ -49,50 +57,18 @@ variables_to_drop = c('White', 'Black', 'Native', 'Asian', 'Islander', 'Other', 
 #Remove variables to drop from data
 full_data = select(full_data, -one_of(variables_to_drop))
 
-#This is only needed if the data is not sorted
-#full_data = full_data %>% arrange(site, date)
-
-#Create vector of all site ids
-sites = unique(full_data$site)
-n = length(sites)
-
-#Sites for train data
-train_sites = sort(sample(sites, ceiling(.8*n)))
-
-#Split data into train and test
-train_data = full_data %>% filter(site %in% train_sites) 
-test_data = full_data %>% filter(!(site %in% train_sites))
-
-#Split test and train into predictors and non-predictors
-x_train = select(train_data, -c(site, date, MonitorData))
-y_train = select(train_data, c(site, date, MonitorData))
-
-x_test = select(test_data, -c(site, date, MonitorData))
-y_test = select(test_data, c(site, date, MonitorData))
+#Remove variables that we do not want to impute
+impute_variables = select(full_data, -c(site, date, month, MonitorData))
+other_variables = select(full_data, c(site, date, month, MonitorData))
 
 #Impute missing values with mean
-#Impute train predictors 
 
-for(i in 1:ncol(x_train)){
+for(i in 1:ncol(impute_variables)){
   
-  x_train[is.na(x_train[,i]), i] = mean(x_train[,i], na.rm = T)
+  impute_variables[is.na(impute_variables[,i]), i] = mean(impute_variables[,i], na.rm = T)
   
 }
-imputed_train_mean = cbind(y_train, x_train)
-
-#Attach imputed train predictors to test predictors, then impute test predictors 
-x_test_with_imputed_train = rbind(x_train, x_test)
-
-for(i in 1:ncol(x_test_with_imputed_train)){
-  
-  x_test_with_imputed_train[is.na(x_test_with_imputed_train[,i]), i] = mean(x_test_with_imputed_train[,i], na.rm = T)
-
-}
-
-#Removed previously attached train data
-imputed_xtest_mean = x_test_with_imputed_train[-(1:nrow(x_train)),]
-imputed_test_mean = cbind(y_test, imputed_xtest_mean)
+imputed_data_mean = cbind(other_variables, impute_variables)
 
 #Write to csv for modeling in python
-write.csv(imputed_train_mean, '../data/imputed_train_mean.csv', row.names = F)
-write.csv(imputed_test_mean, '../data/imputed_test_mean.csv', row.names = F)
+fwrite(imputed_data_mean, 'imputed_data_mean.csv')
