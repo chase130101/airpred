@@ -4,13 +4,13 @@ require(data.table)
 
 
 #Read data
-pollution_data = fread('random_subset.csv')
-location_census_data = fread('sensor_locations_with_census.csv')
+pollution_data = fread('../data/random_subset_0_5p.csv')
+location_census_data = fread('../data/sensor_locations_with_census.csv')
 
 #Join census data with pollution data
 full_data = left_join(pollution_data, location_census_data, by = 'site')
 
-#Join sensors outside of the continental United States
+#Remove sensors outside of the continental United States
 full_data = filter(full_data, Continental_indicator == 1)
 
 #Convert date to date format
@@ -71,4 +71,4 @@ for(i in 1:ncol(impute_variables)){
 imputed_data_mean = cbind(other_variables, impute_variables)
 
 #Write to csv for modeling in python
-fwrite(imputed_data_mean, 'imputed_data_mean.csv')
+fwrite(imputed_data_mean, '../data/imputed_data_mean.csv')
