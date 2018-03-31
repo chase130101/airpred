@@ -4,7 +4,8 @@ require(data.table)
 
 
 #Read data
-pollution_data = fread('../data/random_subset_0_5p.csv')
+#pollution_data = fread('../data/random_subset_0_5p.csv')
+pollution_data = readRDS('assembled_data.Rds')
 location_census_data = fread('../data/sensor_locations_with_census.csv')
 
 #Join census data with pollution data
@@ -72,3 +73,5 @@ imputed_data_mean = cbind(other_variables, impute_variables)
 
 #Write to csv for modeling in python
 fwrite(imputed_data_mean, '../data/imputed_data_mean.csv')
+
+print('Done')
