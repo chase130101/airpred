@@ -2,10 +2,12 @@
 require(dplyr)
 require(data.table)
 require(missForest)
+require(doParallel)
 
 
 #Read data
-pollution_data = fread('../data/random_subset_0_5p.csv')
+#pollution_data = fread('../data/random_subset_0_5p.csv')
+pollution_data = readRDS('assembled_data.Rds')
 location_census_data = fread('../data/sensor_locations_with_census.csv')
 
 #Join census data with pollution data
@@ -58,15 +60,18 @@ variables_to_drop = c('White', 'Black', 'Native', 'Asian', 'Islander', 'Other', 
 #Remove variables to drop from data
 full_data = select(full_data, -one_of(variables_to_drop))
 
+#Take subset for testing
+full_data2 = sample_frac(full_data2, 0.1)
 
 #Remove variables that we do not want to impute
-impute_variables = select(full_data, -c(site, date, MonitorData))
-other_variables = select(full_data, c(site, date, MonitorData))
+impute_variables = select(full_data2, -c(site, date, MonitorData))
+other_variables = select(full_data2, c(site, date, MonitorData))
 
 #Impute missing values using random forest
 
-missforest_imputation = missForest(impute_variables, maxiter = 10, ntree = 25, 
-                                   mtry = 10, variablewise = F,
+registerDoParallel(cores = 10)
+missforest_imputation = missForest(impute_variables, maxiter = 10, ntree = 10, 
+                                   mtry = 10, variablewise = F, parallelize = 'variables',
                                    decreasing = F, verbose = T, replace = T)
 
 cat('Normalized OOB Error', missforest_imputation$OOBerror)
