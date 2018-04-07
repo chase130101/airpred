@@ -4,7 +4,7 @@ require(data.table)
 
 
 #Read data
-#pollution_data = fread('../data/random_subset_0_5p.csv')
+#pollution_data = fread('../data/random_subset_1p.csv')
 pollution_data = readRDS('assembled_data.Rds')
 location_census_data = fread('../data/sensor_locations_with_census.csv')
 
@@ -53,7 +53,8 @@ variables_to_drop = c('White', 'Black', 'Native', 'Asian', 'Islander', 'Other', 
                       'REANALYSIS_air_sfc_DailyMin', 'REANALYSIS_air_sfc_DailyMax', 'REANALYSIS_air_sfc_DailyMean',
                       'Nearby_Peak2_MaxTemperature', 'Nearby_Peak2_MinTemperature', 'Nearby_Peak2Lag1_MaxTemperature', 
                       'Nearby_Peak2Lag1_MeanTemperature', 'Nearby_Peak2Lag1_MinTemperature', 
-                      'Nearby_Peak2Lag3_MaxTemperature', 'Nearby_Peak2Lag3_MinTemperature')
+                      'Nearby_Peak2Lag3_MaxTemperature', 'Nearby_Peak2Lag3_MinTemperature',
+                      'Islander_p', 'Other_p', 'Two_p')
 
 #Remove variables to drop from data
 full_data = select(full_data, -one_of(variables_to_drop))
@@ -62,14 +63,20 @@ full_data = select(full_data, -one_of(variables_to_drop))
 impute_variables = select(full_data, -c(site, date, month, MonitorData))
 other_variables = select(full_data, c(site, date, month, MonitorData))
 
-#Impute missing values with mean
 
-for(i in 1:ncol(impute_variables)){
-  
-  impute_variables[is.na(impute_variables[,i]), i] = mean(impute_variables[,i], na.rm = T)
-  
+#Function to impute the mean 
+impute_mean = function(x){
+  replace(x, is.na(x), mean(x, na.rm = T))
 }
+
+#Impute missing values with mean
+for(i in 1:ncol(impute_variables)){
+  impute_variables[,i] = impute_mean(impute_variables[,i])
+}
+
+#Merge previously removed variables
 imputed_data_mean = cbind(other_variables, impute_variables)
+
 
 #Write to csv for modeling in python
 fwrite(imputed_data_mean, '../data/imputed_data_mean.csv')
