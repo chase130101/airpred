@@ -11,31 +11,6 @@ location_census_data = fread('../data/sensor_locations_with_census.csv')
 #Join census data with pollution data
 full_data = left_join(pollution_data, location_census_data, by = 'site')
 
-#Remove sensors outside of the continental United States
-full_data = filter(full_data, Continental_indicator == 1)
-
-#Convert date to date format
-full_data$date = as.Date(full_data$date)
-
-#Extract month from date
-full_data$month = as.numeric(format(full_data$date,'%m'))
-
-#Redefine year as number of years from starting point
-full_data$year = full_data$year - min(full_data$year)
-
-#Engineer other date features
-full_data$cumulative_month = full_data$year*12 + full_data$month 
-full_data$day_of_year = as.numeric(format(full_data$date,'%d')) + 30*(full_data$month-1)
-full_data$cumulative_day =  365*(full_data$year) + full_data$day_of_year
-full_data$month = as.factor(full_data$month)
-
-#Move date variables to the front of the data frame
-full_data = full_data %>% select(site, year, month, cumulative_month,
-                                 day_of_year, cumulative_day, everything())
-
-#Create latitude, longitude interaction variable 
-full_data$Lat_Lon_int = full_data$Lat * full_data$Lon 
-
 #Variables to drop from data frame
 variables_to_drop = c('White', 'Black', 'Native', 'Asian', 'Islander', 'Other', 'Two', 'Hispanic', 
                       'Age_0_to_9', 'Age_10_to_19', 'Age_20_to_29','Age_30_to_39',
@@ -69,11 +44,35 @@ variables_to_drop = c('White', 'Black', 'Native', 'Asian', 'Islander', 'Other', 
                       'Nearby_Peak2Lag3_NO2','Some_College_p','Native_p','Asian_p','Hispanic_p','Income_50to75k_p',
                       'Age_40to49_p')
 
-
 #Remove variables to drop from data
-data_to_impute = select(full_data, -one_of(variables_to_drop))
+full_data = select(full_data, -one_of(variables_to_drop))
+
+#Remove sensors outside of the continental United States
+full_data = filter(full_data, Continental_indicator == 1)
+
+#Convert date to date format
+full_data$date = as.Date(full_data$date)
+
+#Extract month from date
+full_data$month = as.numeric(format(full_data$date,'%m'))
+
+#Redefine year as number of years from starting point
+full_data$year = full_data$year - min(full_data$year)
+
+#Engineer other date features
+full_data$cumulative_month = full_data$year*12 + full_data$month 
+full_data$day_of_year = as.numeric(format(full_data$date,'%d')) + 30*(full_data$month-1)
+full_data$cumulative_day =  365*(full_data$year) + full_data$day_of_year
+full_data$month = as.factor(full_data$month)
+
+#Move date variables to the front of the data frame
+full_data = full_data %>% select(site, year, month, cumulative_month,
+                                 day_of_year, cumulative_day, everything())
+
+#Create latitude, longitude interaction variable 
+full_data$Lat_Lon_int = full_data$Lat * full_data$Lon 
 
 #Write to csv for modeling in python
-fwrite(data_to_impute, '../data/data_to_impute.csv')
+fwrite(full_data, '../data/data_to_impute.csv')
 
 print('Done')
