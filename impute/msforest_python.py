@@ -20,7 +20,8 @@ data = data.drop(cols, axis = 1) # drop columns as applicable
 impute = predictive_imputer.PredictiveImputer()
 impute.fit(data)
 
-df = pd.DataFrame(impute.transform(data.as_matrix()), columns = data.columns)
-#np.savetxt(args.output_file, impute.transform(data.as_matrix()), delimiter=",")
-df.to_csv(args.output_file)
+#df = pd.DataFrame(impute.transform(data.as_matrix()), columns = data.columns)
+#df.to_csv(args.output_file)
+np.savetxt(args.output_file, impute.transform(data.as_matrix()), 
+delimiter=",",header=','.join(data.columns), comments="")
 
