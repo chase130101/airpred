@@ -11,6 +11,9 @@ location_census_data = fread('../data/sensor_locations_with_census.csv')
 #Join census data with pollution data
 full_data = left_join(pollution_data, location_census_data, by = 'site')
 
+#Remove sensors outside of the continental United States
+full_data = filter(full_data, Continental_indicator == 1)
+
 #Variables to drop from data frame
 variables_to_drop = c('White', 'Black', 'Native', 'Asian', 'Islander', 'Other', 'Two', 'Hispanic', 
                       'Age_0_to_9', 'Age_10_to_19', 'Age_20_to_29','Age_30_to_39',
@@ -46,9 +49,6 @@ variables_to_drop = c('White', 'Black', 'Native', 'Asian', 'Islander', 'Other', 
 
 #Remove variables to drop from data
 full_data = select(full_data, -one_of(variables_to_drop))
-
-#Remove sensors outside of the continental United States
-full_data = filter(full_data, Continental_indicator == 1)
 
 #Convert date to date format
 full_data$date = as.Date(full_data$date)
