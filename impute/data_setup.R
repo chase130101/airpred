@@ -1,6 +1,6 @@
 #Load packages
-require(dplyr)
 require(data.table)
+require(dplyr)
 
 
 #Read data
@@ -45,7 +45,10 @@ variables_to_drop = c('White', 'Black', 'Native', 'Asian', 'Islander', 'Other', 
                       'Business_Restaurant1000','Ozone_Region','REANALYSIS_hpbl_DailyMax','REANALYSIS_vis_DailyMax',
                       'MOD11A1_LST_Day_1km_Nearest4','MOD13A2_Nearest4','Nearby_Peak2_NO2','Nearby_Peak2Lag1_NO2',
                       'Nearby_Peak2Lag3_NO2','Some_College_p','Native_p','Asian_p','Hispanic_p','Income_50to75k_p',
-                      'Age_40to49_p')
+                      'Age_0to9_p', 'Age_10to19_p', 'Age_20to29_p', 'Age_30to39_p', 'Age_40to49_p', 'Age_over70_p',
+                      'Income_0to25k_p', 'Income_25to50k_p', 'Income_75to100k_p', 'Income_over200k_p', 'Family_Household_p',
+                      'NLCD_Barren10000', 'NLCD_Wetlands10000', 'OMSO2e_ColumnAmountSO2_PBL_Mean',
+                      'High_School_p', 'No_Diploma_p', 'Graduate_Degree_p')
 
 #Remove variables to drop from data
 full_data = select(full_data, -one_of(variables_to_drop))
@@ -61,18 +64,24 @@ full_data$year = full_data$year - min(full_data$year)
 
 #Engineer other date features
 full_data$cumulative_month = full_data$year*12 + full_data$month 
-full_data$day_of_year = as.numeric(format(full_data$date,'%d')) + 30*(full_data$month-1)
-full_data$cumulative_day =  365*(full_data$year) + full_data$day_of_year
+#full_data$day_of_year = as.numeric(format(full_data$date,'%d')) + 30*(full_data$month-1)
+#full_data$cumulative_day =  365*(full_data$year) + full_data$day_of_year
 full_data$month = as.factor(full_data$month)
 
 #Move date variables to the front of the data frame
 full_data = full_data %>% select(site, year, month, cumulative_month,
-                                 day_of_year, cumulative_day, everything())
+                                 everything())
 
 #Create latitude, longitude interaction variable 
 full_data$Lat_Lon_int = full_data$Lat * full_data$Lon 
 
-#Write to csv for modeling in python
+#create lead and site mean variables for nearby PM2.5
+full_data = full_data %>% arrange(site, date) %>% group_by(site) %>% 
+  mutate(Nearby_Peak2_PM25_Lead1 = lead(Nearby_Peak2_PM25, default = mean(Nearby_Peak2_PM25, na.rm = T), order_by = date),
+         Nearby_PM25_Site_Mean = mean(Nearby_Peak2_PM25, na.rm = T)) %>%
+  ungroup() %>% as.data.frame()
+
+#Write to csv 
 fwrite(full_data, '../data/data_to_impute.csv')
 
 print('Done')
