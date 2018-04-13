@@ -1,0 +1,61 @@
+import numpy as np
+import pandas as pd
+
+def train_val_test_split(data, site_var_name='site', train_prop, test_prop):
+    """Splits data into train, validation, test sets by PM2.5 monitor site
+    
+    Arguments:
+        data (pandas dataframe): Data to be split
+        site_var_name (string): Site ID variable name
+        train_prop (float): Proportion of sites to be put into train set
+        test_prop (float): Proportion of non-train sites to be put into test set
+    """
+    # get sites for val/test data
+    val_test_sites = np.random.choice(np.unique(data['site'].values), round(len(np.unique(data['site'].values))*(1-train_prop)), replace = False)
+    
+    # get sites for test data
+    test_prop = test_prop/(1-train_prop)
+    test_sites = np.random.choice(np.unique(val_test_sites), round(len(np.unique(val_test_sites))*test_prop), replace = False)
+    
+    # get train, val, and test
+    train = data[~data['site'].isin(val_test_sites)]
+    val = data[(data['site'].isin(val_test_sites)) & (~data['site'].isin(test_sites))]
+    test = data[data['site'].isin(test_sites)]
+    
+    return train, val, test
+
+
+def train_test_split(data, site_var_name='site', train_prop):
+    """Splits data into train test sets by PM2.5 monitor site
+    
+    Arguments:
+        data (pandas dataframe): Data to be split
+        site_var_name (string): Site ID variable name
+        train_prop (float): Proportion of sites to be put into train set
+    """
+    # get sites for train data
+    train_sites = np.random.choice(np.unique(data['site'].values), round(len(np.unique(data['site'].values))*train_prop), replace = False)
+        
+    # get train and test
+    train = data[data['site'].isin(train_sites)]
+    test = data[~data['site'].isin(test_sites)]
+    
+    return train, test
+
+
+def X_y_site_split(data, y_var_name='MonitorData', site_var_name='site'):
+    """Splits a dataframe into X, y, site ID
+    
+    Arguments:
+        data (pandas dataframe): Data to be split
+        y_var_name (string): Response variable name
+        site_var_name (string): Site ID variable name
+    """
+    data_y = data.loc[:, y_var_name]
+    data_sites = data.loc[:, site_var_name]
+    data_x = data.drop([y_var_name, site_var_name], axis=1)
+    
+    return data_x, data_y, data_sites
+
+
+def cross_validation_splits()
