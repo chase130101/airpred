@@ -1,7 +1,0 @@
-Delete Family_Poverty since it is a count
-Delete Continental_ind; will all be same
-Re-look at variable selection: be more strict
-How to do train/test split with full data?
-How to do imputation with train/test split?
-How to do cross-validation with train/test split method?
-
