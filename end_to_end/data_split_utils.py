@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-def train_val_test_split(data, site_var_name='site', train_prop, test_prop):
+def train_val_test_split(data, train_prop, test_prop, site_var_name='site'):
     """Splits data into train, validation, test sets by PM2.5 monitor site
     
     Arguments:
@@ -25,7 +25,7 @@ def train_val_test_split(data, site_var_name='site', train_prop, test_prop):
     return train, val, test
 
 
-def train_test_split(data, site_var_name='site', train_prop):
+def train_test_split(data, train_prop, site_var_name='site'):
     """Splits data into train test sets by PM2.5 monitor site
     
     Arguments:
@@ -38,7 +38,7 @@ def train_test_split(data, site_var_name='site', train_prop):
         
     # get train and test
     train = data[data[site_var_name].isin(train_sites)]
-    test = data[~data[site_var_name].isin(test_sites)]
+    test = data[~data[site_var_name].isin(train_sites)]
     
     return train, test
 
@@ -81,8 +81,8 @@ def cross_validation_splits(data, num_folds, site_var_name='site'):
     # produce cross-validation train test splits based on indices
     train_test_splits = []
     for i in range(num_folds):
-        test_i = ind_by_fold[i]
-        train_i = list(np.concatenate(ind_by_fold[:i] + ind_by_fold[i+1:]).astype(int))
+        test_i = np.array(ind_by_fold[i])
+        train_i = np.array(np.concatenate(ind_by_fold[:i] + ind_by_fold[i+1:]).astype(int))
         train_test_splits.append((train_i, test_i))
                                  
-    return train_test_splits
+    return np.array(train_test_splits)

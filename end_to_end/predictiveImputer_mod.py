@@ -35,8 +35,13 @@ class PredictiveImputer(BaseEstimator, TransformerMixin):
         elif self.f_model == 'KNN':
             self.estimators_ = [[KNeighborsRegressor(n_neighbors=min(5, sum(~X_nan[:, i])), **kwargs) for i in range(X.shape[1])] for j in range(self.max_iter)]
         
+        print('Number of variables: ' + str(len(least_by_nan)))
         for iter in range(self.max_iter):
+            print('Iteration ' + str(iter+1))
+            var_counter = 0
             for i in least_by_nan:
+                print('Variable # ' + str(var_counter))
+                var_counter += 1
 
                 X_s = np.delete(new_imputed, i, 1)
                 y_nan = X_nan[:, i]
@@ -52,6 +57,8 @@ class PredictiveImputer(BaseEstimator, TransformerMixin):
                 
             gamma = np.sum((new_imputed-imputed)**2)/np.sum(new_imputed**2)
             self.gamma_.append(gamma)
+            print('Difference: ' + str(gamma))
+            print()
             imputed = new_imputed.copy()
             if iter >= 1:
                 if self.gamma_[iter] >= self.gamma_[iter-1]:
