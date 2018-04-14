@@ -5,8 +5,8 @@ import sklearn.linear_model
 import sklearn.model_selection
 import sklearn.metrics
 
-train = pd.read_csv('train_ridgeImp.csv')
-test = pd.read_csv('test_ridgeImp.csv')
+train = pd.read_csv('../data/train_ridgeImp.csv')
+test = pd.read_csv('../data/test_ridgeImp.csv')
 
 train = train.dropna(axis = 0)
 test = test.dropna(axis = 0)

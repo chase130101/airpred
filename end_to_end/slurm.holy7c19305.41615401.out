@@ -1,0 +1,3 @@
+Fitting 5 folds for each of 8 candidates, totalling 40 fits
+Best regularization hyperparameter: {'alpha': 0.01}
+Test R^2: 0.741156516412
