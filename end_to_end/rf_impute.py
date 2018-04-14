@@ -40,3 +40,4 @@ test_imp_df = pd.DataFrame(np.concatenate([test_sites.values.reshape(len(test_si
 
 train_imp_df.to_csv('train_rfImp.csv', index = False)
 test_imp_df.to_csv('test_rfImp.csv', index = False)
+pickle.dump(rf_imputer, open('rf_imputer.pkl', 'wb'))
