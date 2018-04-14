@@ -19,7 +19,7 @@ test_x, test_y, test_sites = X_y_site_split(test, y_var_name='MonitorData', site
 
 ridge = sklearn.linear_model.Ridge(random_state = 1, normalize=True)
 parameter_grid_ridge = {'alpha' : [1000, 100, 10, 1, 0.1, 0.01, 0.001, 0.0001]}
-grid_ridge = sklearn.model_selection.GridSearchCV(ridge, parameter_grid_ridge, cv = cv_splits, refit = 'r2', verbose=1)
+grid_ridge = sklearn.model_selection.GridSearchCV(ridge, parameter_grid_ridge, cv = cv_splits, refit = 'r2', verbose=1, n_jobs=-1)
 grid_ridge.fit(train_x, train_y)
 test_pred_ridge = grid_ridge.predict(test_x)
 test_r2_ridge = sklearn.metrics.r2_score(test_y, test_pred_ridge)

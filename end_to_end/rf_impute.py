@@ -5,7 +5,7 @@ import numpy as np
 
 np.random.seed(1)
 
-data = pd.read_csv('data_to_impute.csv')
+data = pd.read_csv('../data/data_to_impute.csv')
 
 train, test = train_test_split(data, train_prop = 0.8, site_var_name = 'site')
 

@@ -20,3 +20,5 @@ data/sensor_census_imputed_mean.csv
 data/assembled_data.csv
 *__pycache__
 end_to_end/*.csv
+data/*ridgeImp.csv
+data/data_to_impute.csv

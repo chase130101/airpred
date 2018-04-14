@@ -6,9 +6,9 @@ import pickle
 
 np.random.seed(1)
 
-data = pd.read_csv('data_to_impute.csv')
+data = pd.read_csv('../data/data_to_impute.csv')
 
-train, test = train_test_split(data, train_prop = 0.6, site_var_name = 'site')
+train, test = train_test_split(data, train_prop = 0.8, site_var_name = 'site')
 
 train_x, train_y, train_sites = X_y_site_split(train, y_var_name='MonitorData', site_var_name='site')
 test_x, test_y, test_sites = X_y_site_split(test, y_var_name='MonitorData', site_var_name='site')
@@ -39,6 +39,6 @@ test_imp_df = pd.DataFrame(np.concatenate([test_sites.values.reshape(len(test_si
                                               test_x_imp], axis=1),\
                                               columns = cols)
 
-train_imp_df.to_csv('train_ridgeImp.csv', index = False)
-test_imp_df.to_csv('test_ridgeImp.csv', index = False)
+train_imp_df.to_csv('../data/train_ridgeImp.csv', index = False)
+test_imp_df.to_csv('../data/test_ridgeImp.csv', index = False)
 pickle.dump(ridge_imputer, open('ridge_imputer.pkl', 'wb'))
