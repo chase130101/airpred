@@ -67,7 +67,10 @@ def cross_validation_splits(data, num_folds, site_var_name='site'):
         num_folds (int): Number of cross_validation folds
     """
     # get site ids for each fold
-    site_ids_by_fold = np.random.choice(np.unique(data[site_var_name].values), (num_folds, round(len(np.unique(data[site_var_name].values))/num_folds)), replace = False)
+    try:
+        site_ids_by_fold = np.random.choice(np.unique(data[site_var_name].values), (num_folds, round(len(np.unique(data[site_var_name].values))/num_folds)), replace = False)
+    except ValueError:
+        site_ids_by_fold = np.random.choice(np.unique(data[site_var_name].values), (num_folds, round(len(np.unique(data[site_var_name].values))/(num_folds+1))), replace = False)
     site_ids_by_fold = [list(site_ids_by_fold[i]) for i in range(num_folds)]
     leftover_sites = list(np.unique(data[~data[site_var_name].isin(np.unique(site_ids_by_fold))][site_var_name]))
     site_ids_by_fold[0] += leftover_sites
