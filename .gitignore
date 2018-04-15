@@ -24,3 +24,4 @@ data/*ridgeImp.csv
 data/data_to_impute.csv
 *.out
 *.err
+data/*.rds
