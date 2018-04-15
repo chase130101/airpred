@@ -80,7 +80,7 @@ def get_monitorData_indices(sequence):
     return ordered_response_indices
 
 
-def r2(model, batch_size, x_stack_vary, x_tuple_static, y_tuple):
+def r2(model, batch_size, x_stack_nonConst, x_tuple, y_tuple):
     """Computes R-squared
     
     Arguments:
@@ -88,40 +88,60 @@ def r2(model, batch_size, x_stack_vary, x_tuple_static, y_tuple):
         batch_size (int): to determine how many sequences to read in at a time
         x_stack (tensor): stack of site data sequences
         y_tuple (tuple): tuple of true y values by sequence, including NaNs
-    
     """
     y = []
     pred = []
     
     # get number of batches
-    if x_stack_vary.size()[0] % batch_size != 0:
-        num_batches = int(np.floor(x_stack_vary.size()[0]/batch_size) + 1)
+    if x_stack_nonConst.size()[0] % batch_size != 0:
+        num_batches = int(np.floor(x_stack_nonConst.size()[0]/batch_size) + 1)
     else:
-        num_batches = int(x_stack_vary.size()[0]/batch_size)
+        num_batches = int(x_stack_nonConst.size()[0]/batch_size)
         
     for batch in range(num_batches):
         # get x and y for this batch
-        x_stack_batch_vary = x_stack_vary[batch_size * batch:batch_size * (batch+1)]
-        x_tuple_batch_static = x_tuple_static[batch_size * batch:batch_size * (batch+1)]
+        x_stack_batch_nonConst = x_stack_nonConst[batch_size * batch:batch_size * (batch+1)]
+        x_tuple_batch = x_tuple[batch_size * batch:batch_size * (batch+1)]
         y_tuple_nans = y_tuple[batch_size * batch:batch_size * (batch+1)]
         
         # get indices for monitor data and actual monitor data
         y_by_site = []
-        x_static_by_site = []
+        x_by_site = []
         y_ind_by_site = []
         for i in range(len(y_tuple_nans)):
             y_ind = get_monitorData_indices(y_tuple_nans[i])
             y_by_site.append(y_tuple_nans[i][y_ind])
             y_ind_by_site.append(y_ind)
-            x_static_by_site.append(x_tuple_batch_static[i][y_ind])
+            x_by_site.append(x_tuple_batch[i][y_ind])
         y_batch = list(Variable(torch.cat(y_by_site, dim=0)).data.numpy())
-        x_batch_static = Variable(torch.cat(x_static_by_site, dim=0)).float()
+        x_batch = Variable(torch.cat(x_by_site, dim=0)).float()
         
         # get model output
-        pred_batch = list(cnn(x_stack_batch_vary, x_batch_static, y_ind_by_site).data.numpy())
+        pred_batch = list(model(x_stack_batch_nonConst, x_batch, y_ind_by_site).data.numpy())
         
         # concatenate new predictions with ones from previous batches
         y += y_batch
         pred += pred_batch
         
     return sklearn.metrics.r2_score(y, pred)
+
+
+def get_nonConst_vars(data, site_var_name = 'site', y_var_name = 'MonitorData', cutoff = 1000):
+    """Get column names for variables that are not constant within a sensor sequence
+    
+    Arguments:
+        data (pandas dataframe): For checking if variables are non-constant
+        site_var_name (str): Column name for monitor site
+        y_var_name (str): Column name for monitor output
+        cutoff (int): Number of unique values a variable needs to have to be considered non-constant
+    """
+    site = data.loc[:, site_var_name].values[0]
+    data_site = data[data[site_var_name] == site]
+    data_site_x = data_site.drop([site_var_name, y_var_name], axis=1)
+    
+    nonConst_colNames = []
+    for i in range(data_site_x.shape[1]):
+        if len(np.unique(data_site_x.iloc[:, i].values)) >= cutoff:
+            nonConst_colNames.append(data_site_x.columns[i])
+    
+    return nonConst_colNames

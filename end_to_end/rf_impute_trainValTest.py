@@ -1,4 +1,4 @@
-from data_split_utils import train_test_split, X_y_site_split, cross_validation_splits
+from data_split_utils import train_test_split, X_y_site_split, train_val_test_split
 from predictiveImputer_mod import PredictiveImputer
 import pandas as pd
 import numpy as np
@@ -7,32 +7,36 @@ import pickle
 np.random.seed(1)
 
 data = pd.read_csv('../data/data_to_impute.csv')
-print('Loaded full data')
-train, test = train_test_split(data, train_prop = 0.8, site_var_name = 'site')
-train1, train2 = train_test_split(train, train_prop = 0.2, site_var_name = 'site')
-print('Split full data')
+
+train, val, test = train_val_test_split(data, train_prop = 0.7, test_prop = 0.15, site_var_name = 'site')
+train1, train2 = train_test_split(train, train_prop = 0.3, site_var_name = 'site')
+
 train1_x, train1_y, train1_sites = X_y_site_split(train1, y_var_name='MonitorData', site_var_name='site')
 train2_x, train2_y, train2_sites = X_y_site_split(train2, y_var_name='MonitorData', site_var_name='site')
+val_x, val_y, val_sites = X_y_site_split(val, y_var_name='MonitorData', site_var_name='site')
 test_x, test_y, test_sites = X_y_site_split(test, y_var_name='MonitorData', site_var_name='site')
-print('Split subset')
+
 #https://ianlondon.github.io/blog/encoding-cyclical-features-24hour-time/
 train1_x['sin_time'] = np.sin(2*np.pi*train1_x.month/12)
 train1_x['cos_time'] = np.cos(2*np.pi*train1_x.month/12)
 train2_x['sin_time'] = np.sin(2*np.pi*train2_x.month/12)
 train2_x['cos_time'] = np.cos(2*np.pi*train2_x.month/12)
+val_x['sin_time'] = np.sin(2*np.pi*val_x.month/12)
+val_x['cos_time'] = np.cos(2*np.pi*val_x.month/12)
 test_x['sin_time'] = np.sin(2*np.pi*test_x.month/12)
 test_x['cos_time'] = np.cos(2*np.pi*test_x.month/12)
-print('Created time features')
+
 train1_x = train1_x.drop(['date', 'month'], axis=1)
-#train2_x = train2_x.drop(['date', 'month'], axis=1)
-#test_x = test_x.drop(['date', 'month'], axis=1)
+train2_x = train2_x.drop(['date', 'month'], axis=1)
+val_x = val_x.drop(['date', 'month'], axis=1)
+test_x = test_x.drop(['date', 'month'], axis=1)
 
 rf_imputer = PredictiveImputer(max_iter=10, initial_strategy='mean', f_model='RandomForest')
-print('Created imputer')
 rf_imputer.fit(train1_x, max_features = 'sqrt', n_estimators = 50, n_jobs=-1, verbose=1, random_state=1)
-print('Fit imputer')
+
 train1_x_imp = rf_imputer.transform(train1_x)
 train2_x_imp = rf_imputer.transform(train2_x)
+val_x_imp = rf_imputer.transform(val_x)
 test_x_imp = rf_imputer.transform(test_x)
 
 cols = ['site', 'MonitorData'] + list(train1_x.columns)
@@ -46,6 +50,11 @@ train2_imp_df = pd.DataFrame(np.concatenate([train2_sites.values.reshape(len(tra
                                               train2_x_imp], axis=1),\
                                               columns = cols)
 
+val_imp_df = pd.DataFrame(np.concatenate([val_sites.values.reshape(len(val_sites), -1),\
+                                              val_y.values.reshape(len(val_y), -1),\
+                                              val_x_imp], axis=1),\
+                                              columns = cols)
+
 test_imp_df = pd.DataFrame(np.concatenate([test_sites.values.reshape(len(test_sites), -1),\
                                               test_y.values.reshape(len(test_y), -1),\
                                               test_x_imp], axis=1),\
@@ -56,7 +65,7 @@ train_imp_df = train_imp_df.reset_index().sort_values(['site', 'index'])
 train_imp_df.drop('index', axis=1, inplace=True)
 train_imp_df.reset_index(inplace=True, drop=True)
 
-train_imp_df.to_csv('../data/train_rfImp.csv', index = False)
-test_imp_df.to_csv('../data/test_rfimp.csv', index = False)
-pickle.dump(rf_imputer, open('rf_imputer.pkl', 'wb'))
-print('Saved imputer')
+train_imp_df.to_csv('../data/trainV_rfImp.csv', index = False)
+val_imp_df.to_csv('../data/valV_rfImp.csv', index = False)
+test_imp_df.to_csv('../data/testV_rfImp.csv', index = False)
+pickle.dump(rf_imputer, open('rfV_imputer.pkl', 'wb'))
