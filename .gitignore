@@ -22,3 +22,5 @@ data/assembled_data.csv
 end_to_end/*.csv
 data/*ridgeImp.csv
 data/data_to_impute.csv
+*.out
+*.err
