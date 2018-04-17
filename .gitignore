@@ -23,7 +23,5 @@ end_to_end/*.csv
 data/*ridgeImp.csv
 data/*rfImp.csv
 data/data_to_impute.csv
-*.out
-*.err
 data/*.rds
 
