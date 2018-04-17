@@ -13,7 +13,7 @@ test = test.dropna(axis = 0)
 train_x, train_y, train_sites = X_y_site_split(train, y_var_name='MonitorData', site_var_name='site')
 test_x, test_y, test_sites = X_y_site_split(test, y_var_name='MonitorData', site_var_name='site')
 
-alpha = 0.01
+alpha = 0.00001
 ridge = sklearn.linear_model.Ridge(random_state = 1, normalize=True, alpha = alpha)
 ridge.fit(train_x, train_y)
 test_pred_ridge = ridge.predict(test_x)
