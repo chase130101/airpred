@@ -1,0 +1,1 @@
+Note that the fonts rendered strangely when converting the lightning_talk.pptx to lightning_talk.pdf
