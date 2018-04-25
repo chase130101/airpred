@@ -8,5 +8,6 @@ Still to do:
 - Create an xgboost model
 - Fix neural net
 - Try GP as first pass modeling approach (predictions can be used as features in other models)
+- Installation scripts and instructions
 - Documentation of everything
 - Compile results to create poster/website
