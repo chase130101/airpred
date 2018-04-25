@@ -6,7 +6,7 @@ import pickle
 
 np.random.seed(1)
 
-data = pd.read_csv('../data/data_to_impute.csv')
+data = pd.read_csv('../data/data_to_impute.csv', nrows=1000000)
 
 train, test = train_test_split(data, train_prop = 0.8, site_var_name = 'site')
 train1, train2 = train_test_split(train, train_prop = 0.2, site_var_name = 'site')
@@ -56,5 +56,5 @@ train_imp_df.drop('index', axis=1, inplace=True)
 train_imp_df.reset_index(inplace=True, drop=True)
 
 train_imp_df.to_csv('../data/train_rfImp.csv', index = False)
-test_imp_df.to_csv('../data/test_rfimp.csv', index = False)
+test_imp_df.to_csv('../data/test_rfImp.csv', index = False)
 pickle.dump(rf_imputer, open('rf_imputer.pkl', 'wb'))
