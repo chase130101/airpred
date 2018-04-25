@@ -3,6 +3,7 @@ import numpy as np
 from data_split_utils import X_y_site_split
 import sklearn.linear_model
 import sklearn.metrics
+import sklearn.preprocessing
 
 train = pd.read_csv('../data/train_ridgeImp.csv')
 test = pd.read_csv('../data/test_ridgeImp.csv')
@@ -13,7 +14,11 @@ test = test.dropna(axis = 0)
 train_x, train_y, train_sites = X_y_site_split(train, y_var_name='MonitorData', site_var_name='site')
 test_x, test_y, test_sites = X_y_site_split(test, y_var_name='MonitorData', site_var_name='site')
 
-alpha = 0.00001
+poly_transformer = sklearn.preprocessing.PolynomialFeatures(degree=2, interaction_only=False, include_bias=False)
+train_x = poly_transformer.fit_transform(train_x)
+test_x = poly_transformer.fit_transform(test_x)
+
+alpha = 0.1
 ridge = sklearn.linear_model.Ridge(random_state = 1, normalize=True, alpha = alpha)
 ridge.fit(train_x, train_y)
 test_pred_ridge = ridge.predict(test_x)
