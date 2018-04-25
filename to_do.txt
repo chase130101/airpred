@@ -3,6 +3,8 @@ Still to do:
 - Write a general validation/cross-validation script
 - Write script to measure accuracy of imputations
 - Get random forest imputations saved (memory problems here)
+- Do train, validation, test split in separate file than imputation script
+- Actually impute values in a different script than the one that fits the imputation models
 - Create an xgboost model
 - Fix neural net
 - Try GP as first pass modeling approach (predictions can be used as features in other models)
