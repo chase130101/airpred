@@ -1,0 +1,10 @@
+Still to do:
+- Have scripts that take input files so that stuff isn't hard-coded
+- Write a general validation/cross-validation script
+- Write script to measure accuracy of imputations
+- Get random forest imputations saved (memory problems here)
+- Create an xgboost model
+- Fix neural net
+- Try GP as first pass modeling approach (predictions can be used as features in other models)
+- Documentation of everything
+- Compile results to create poster/website
