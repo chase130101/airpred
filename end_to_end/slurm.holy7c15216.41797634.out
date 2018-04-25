@@ -1,4 +1,0 @@
-R^2 (MonitorData ~ MAIACUS_Optical_Depth_047_Terra_Nearest4, train): 0.169543462621
-R^2 (MonitorData ~ MAIACUS_Optical_Depth_047_Terra_Nearest4, test): 0.155959958008
-R^2 (MonitorData ~ Nearby_Peak2_PM2.5, train): 0.741235713304
-R^2 (MonitorData ~ Nearby_Peak2_PM2.5, test): 0.712048095135

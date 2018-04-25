@@ -1,0 +1,2 @@
+/var/slurmd/spool/slurmd/job42250722/slurm_script: line 9: 193919 Killed                  python rf_impute_trainTest.py
+slurmstepd: error: Detected 1 oom-kill event(s) in step 42250722.batch cgroup.
