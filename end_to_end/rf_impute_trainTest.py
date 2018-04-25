@@ -28,14 +28,11 @@ train2_x = train2_x.drop(['date', 'month'], axis=1)
 test_x = test_x.drop(['date', 'month'], axis=1)
 
 rf_imputer = PredictiveImputer(max_iter=10, initial_strategy='mean', f_model='RandomForest')
-print('Created imputer')
-rf_imputer.fit(train1_x, max_features = 'sqrt', n_estimators = 100, n_jobs=-1, verbose=1, random_state=1)
-print('Fit imputer')
+rf_imputer.fit(train1_x, max_features = 10, n_estimators = 100, n_jobs=-1, verbose=1, random_state=1)
 
 train1_x_imp = rf_imputer.transform(train1_x)
 train2_x_imp = rf_imputer.transform(train2_x)
 test_x_imp = rf_imputer.transform(test_x)
-print('Made imputations')
 
 cols = ['site', 'MonitorData'] + list(train1_x.columns)
 train1_imp_df = pd.DataFrame(np.concatenate([train1_sites.values.reshape(len(train1_sites), -1),\
