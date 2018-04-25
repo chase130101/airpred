@@ -32,7 +32,7 @@ val_x = val_x.drop(['date', 'month'], axis=1)
 test_x = test_x.drop(['date', 'month'], axis=1)
 
 ridge_imputer = PredictiveImputer(max_iter=10, initial_strategy='mean', f_model='Ridge')
-ridge_imputer.fit(train1_x, alpha=0.0001, fit_intercept=True, normalize=True, tol=0.001, random_state=1)
+ridge_imputer.fit(train1_x, alpha=0.001, fit_intercept=True, normalize=True, tol=0.001, random_state=1)
 
 train1_x_imp = ridge_imputer.transform(train1_x)
 train2_x_imp = ridge_imputer.transform(train2_x)
