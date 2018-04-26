@@ -6,10 +6,10 @@ import pickle
 
 np.random.seed(1)
 
-data = pd.read_csv('../data/data_to_impute.csv', nrows=1000000)
+data = pd.read_csv('../data/data_to_impute.csv', nrows=3000000)
 
 train, test = train_test_split(data, train_prop = 0.8, site_var_name = 'site')
-train1, train2 = train_test_split(train, train_prop = 0.2, site_var_name = 'site')
+train1, train2 = train_test_split(train, train_prop = 0.8, site_var_name = 'site')
 
 train1_x, train1_y, train1_sites = X_y_site_split(train1, y_var_name='MonitorData', site_var_name='site')
 train2_x, train2_y, train2_sites = X_y_site_split(train2, y_var_name='MonitorData', site_var_name='site')
@@ -28,7 +28,7 @@ train2_x = train2_x.drop(['date', 'month'], axis=1)
 test_x = test_x.drop(['date', 'month'], axis=1)
 
 rf_imputer = PredictiveImputer(max_iter=10, initial_strategy='mean', f_model='RandomForest')
-rf_imputer.fit(train1_x, max_features = 10, n_estimators = 10, n_jobs=-1, verbose=1, random_state=1)
+rf_imputer.fit(train1_x, max_features = 10, n_estimators = 25, n_jobs=-1, verbose=1, random_state=1)
 
 train1_x_imp = rf_imputer.transform(train1_x)
 train2_x_imp = rf_imputer.transform(train2_x)
