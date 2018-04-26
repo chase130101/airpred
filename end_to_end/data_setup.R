@@ -6,13 +6,13 @@ require(dplyr)
 #pollution_data = fread('../data/assembled_data.csv')
 pollution_data = readRDS('../data/assembled_data.rds')
 location_census_data = fread('../data/sensor_locations_with_census.csv')
-print('loaded')
+
 #Join census data with pollution data
 full_data = left_join(pollution_data, location_census_data, by = 'site')
-print('left join')
+
 #Remove sensors outside of the continental United States
 full_data = filter(full_data, Continental_indicator == 1)
-print('filtered')
+
 #Variables to drop from data frame
 variables_to_drop = c('White', 'Black', 'Native', 'Asian', 'Islander', 'Other', 'Two', 'Hispanic', 
                       'Age_0_to_9', 'Age_10_to_19', 'Age_20_to_29','Age_30_to_39',
@@ -65,10 +65,13 @@ full_data$year = full_data$year - min(full_data$year)
 full_data$cumulative_month = full_data$year*12 + full_data$month 
 #full_data$day_of_year = as.numeric(format(full_data$date,'%d')) + 30*(full_data$month-1)
 #full_data$cumulative_day =  365*(full_data$year) + full_data$day_of_year
-full_data$month = as.factor(full_data$month)
+
+#https://ianlondon.github.io/blog/encoding-cyclical-features-24hour-time/
+full_data = full_data %>% mutate(sin_time = round(sin(2*pi*month/12), 8),
+                                 cos_time = round(cos(2*pi*month/12), 8))
 
 #Move date variables to the front of the data frame
-full_data = full_data %>% select(site, year, month, cumulative_month,
+full_data = full_data %>% select(site, year, month, cumulative_month, sin_time, cos_time,
                                  everything())
 
 #Create latitude, longitude interaction variable 
@@ -79,6 +82,9 @@ full_data = full_data %>% arrange(site, date) %>% group_by(site) %>%
   mutate(Nearby_Peak2_PM25_Lead1 = lead(Nearby_Peak2_PM25, default = mean(Nearby_Peak2_PM25, na.rm = T), order_by = date),
          Nearby_PM25_Site_Mean = mean(Nearby_Peak2_PM25, na.rm = T)) %>%
   ungroup() %>% as.data.frame()
+
+#Remove date variable
+full_data = select(full_data, -date)
 
 #Write to csv 
 fwrite(full_data, '../data/data_to_impute.csv')
