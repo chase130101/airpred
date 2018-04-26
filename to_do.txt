@@ -1,7 +1,7 @@
 Still to do:
 - Have scripts that take input files so that stuff isn't hard-coded (Justin)
-- Write a general validation/cross-validation script (Keyan)
-- Write script to measure accuracy of imputations (Anyone)
+- Write a general validation/cross-validation script (Chris)
+- Write script to measure accuracy of imputations (Chris)
 - Get random forest imputations saved (memory problems here) (Chris)
 - Do train, validation, test split in separate file than imputation script (Chris)
 - Actually impute values in a different script than the one that fits the imputation models (Chris)
@@ -10,4 +10,5 @@ Still to do:
 - Try GP as first pass modeling approach (predictions can be used as features in other models) (Casey)
 - Installation scripts and instructions (Justin)
 - Documentation of everything (Everyone)
+- EDA and justification of variable decisions (Keyan)
 - Compile results to create poster/website (Everyone)
