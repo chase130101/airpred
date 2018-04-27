@@ -7,7 +7,6 @@ from sklearn.linear_model import Ridge
 from sklearn.preprocessing import Imputer
 from sklearn.utils.validation import check_array, check_is_fitted, check_X_y
 
-
 class PredictiveImputer(BaseEstimator, TransformerMixin):
     def __init__(self, max_iter=10, initial_strategy='mean', f_model='RandomForest'):
         self.max_iter = max_iter

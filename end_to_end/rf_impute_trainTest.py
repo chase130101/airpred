@@ -1,12 +1,12 @@
-from data_split_utils import train_test_split, X_y_site_split
-from predictiveImputer_mod import PredictiveImputer
 import pandas as pd
 import numpy as np
 import pickle
+from data_split_utils import train_test_split, X_y_site_split
+from predictiveImputer_mod import PredictiveImputer
 
 np.random.seed(1)
 
-data = pd.read_csv('../data/data_to_impute.csv', nrows=3000000)
+data = pd.read_csv('../data/train.csv', nrows=3000000)
 
 train, test = train_test_split(data, train_prop = 0.8, site_var_name = 'site')
 train1, train2 = train_test_split(train, train_prop = 0.8, site_var_name = 'site')
