@@ -6,6 +6,7 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.linear_model import Ridge
 from sklearn.preprocessing import Imputer
 from sklearn.utils.validation import check_array, check_is_fitted, check_X_y
+from sklearn.metrics import r2_score
 
 class PredictiveImputer(BaseEstimator, TransformerMixin):
     def __init__(self, max_iter=10, initial_strategy='mean', f_model='RandomForest'):
@@ -69,7 +70,7 @@ class PredictiveImputer(BaseEstimator, TransformerMixin):
         
         return self
 
-    def transform(self, X):
+    def transform(self, X, evaluate = True):
         check_is_fitted(self, ['statistics_', 'estimators_', 'gamma_'])
         X = check_array(X, copy=True, dtype=np.float64, force_all_finite=False)
         if X.shape[1] != self.statistics_.shape[1]:
@@ -79,6 +80,8 @@ class PredictiveImputer(BaseEstimator, TransformerMixin):
         X_nan = np.isnan(X)
         imputed = self.initial_imputer.fit_transform(X)
         
+        if evaluate == True:
+            r2_list = []
         for iter in range(self.num_iter):
             for i in self.least_by_nan:
                     
@@ -90,5 +93,15 @@ class PredictiveImputer(BaseEstimator, TransformerMixin):
                 estimator_ = self.estimators_[iter][i]
                 if len(X_unk) > 0:
                     imputed[y_nan, i] = estimator_.predict(X_unk)
-
-        return imputed
+            
+            if iter == self.iter-1 and evaluate == True:
+                X_known = X_s[~y_nan]
+                pred = estimator_.predict(X_known)
+                r2 = r2_score(imputed[~y_nan, i], pred)
+                r2_list.append(r2)
+        
+        if evaluate == True:
+            self.r2_scores = r2_list
+            return imputed, r2_list
+        else:
+            return imputed

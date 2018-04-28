@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from data_split_utils import train_test_split
+from data_split_tune_utils import train_test_split
 
 np.random.seed(1)
 data = pd.read_csv('../data/data_to_impute.csv')

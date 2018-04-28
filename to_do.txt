@@ -1,6 +1,5 @@
 Still to do:
 - Have scripts that take input files so that stuff isn't hard-coded (Justin)
-- Write script to measure accuracy of imputations for ridge; include eval in rf_imputer_fit file since can't save rf imputations (Chris)
 - Write script that does cross-validation (Chris)
 - Write scripts that fit best model from CV on full train data and then test on test data (Chris)
 - Fix neural net (Chris)
