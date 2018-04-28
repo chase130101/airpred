@@ -32,7 +32,7 @@ test_imp_df = pd.DataFrame(np.concatenate([test_sites.values.reshape(len(test_si
                                               test_x_imp], axis=1),\
                                               columns = cols)
 
-r2_scores_df = pd.DataFrame(np.concatenate([cols[2:].reshape(len(cols)-2, -1),\
+r2_scores_df = pd.DataFrame(np.concatenate([np.array(cols[2:]).reshape(len(cols)-2, -1),\
                                               np.array(train_r2_scores).reshape(len(train_r2_scores), -1),\
                                               np.array(val_r2_scores).reshape(len(val_r2_scores), -1),\
                                               np.array(test_r2_scores).reshape(len(test_r2_scores), -1)], axis=1),\

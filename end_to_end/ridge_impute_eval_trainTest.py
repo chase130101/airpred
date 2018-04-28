@@ -3,8 +3,8 @@ import pandas as pd
 import pickle
 from data_split_tune_utils import X_y_site_split
 
-train = pd.read_csv('../data/train_ridgeImp.csv')
-test = pd.read_csv('../data/test_ridgeImp.csv')
+train = pd.read_csv('../data/train.csv')
+test = pd.read_csv('../data/test.csv')
 ridge_imputer = pickle.load(open('ridge_imputer.pkl', 'rb'))
 
 train_x, train_y, train_sites = X_y_site_split(train, y_var_name='MonitorData', site_var_name='site')
@@ -24,7 +24,7 @@ test_imp_df = pd.DataFrame(np.concatenate([test_sites.values.reshape(len(test_si
                                               test_x_imp], axis=1),\
                                               columns = cols)
 
-r2_scores_df = pd.DataFrame(np.concatenate([cols[2:].reshape(len(cols)-2, -1),\
+r2_scores_df = pd.DataFrame(np.concatenate([np.array(cols[2:]).reshape(len(cols)-2, -1),\
                                               np.array(train_r2_scores).reshape(len(train_r2_scores), -1),\
                                               np.array(test_r2_scores).reshape(len(test_r2_scores), -1)], axis=1),\
                                               columns = ['Variable', 'Train_R2', 'Test_R2'])

@@ -4,7 +4,7 @@ require(dplyr)
 
 #Read data
 #pollution_data = fread('../data/assembled_data.csv')
-pollution_data = readRDS('../data/assembled_data.csv')
+pollution_data = readRDS('../data/assembled_data.rds')
 location_census_data = fread('../data/sensor_locations_with_census.csv')
 
 #Join census data with pollution data

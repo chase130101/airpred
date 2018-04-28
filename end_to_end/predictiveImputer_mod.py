@@ -94,7 +94,7 @@ class PredictiveImputer(BaseEstimator, TransformerMixin):
                 if len(X_unk) > 0:
                     imputed[y_nan, i] = estimator_.predict(X_unk)
             
-            if iter == self.iter-1 and evaluate == True:
+            if iter == self.num_iter-1 and evaluate == True:
                 X_known = X_s[~y_nan]
                 pred = estimator_.predict(X_known)
                 r2 = r2_score(imputed[~y_nan, i], pred)
