@@ -6,7 +6,7 @@ from predictiveImputer_mod import PredictiveImputer
 
 np.random.seed(1)
 
-data = pd.read_csv('../data/data_to_impute.csv', nrows=500000)
+data = pd.read_csv('../data/data_to_impute.csv')
 
 train, val, test = train_val_test_split(data, train_prop = 0.7, test_prop = 0.15, site_var_name = 'site')
 train1, train2 = train_test_split(train, train_prop = 0.34, site_var_name = 'site')
@@ -17,7 +17,7 @@ val_x, val_y, val_sites = X_y_site_split(val, y_var_name='MonitorData', site_var
 test_x, test_y, test_sites = X_y_site_split(test, y_var_name='MonitorData', site_var_name='site')
 
 rf_imputer = PredictiveImputer(max_iter=10, initial_strategy='mean', f_model='RandomForest')
-rf_imputer.fit(train1_x, max_features=5, n_estimators=5, n_jobs=-1, verbose=0, random_state=1)
+rf_imputer.fit(train1_x, max_features=15, n_estimators=50, n_jobs=-1, verbose=0, random_state=1)
 
 train1_x_imp, train1_r2_scores_df = rf_imputer.transform(train1_x, evaluate = True, backup_impute_strategy = 'mean')
 train1_r2_scores_df.columns = ['Train1_R2', 'Train1_num_missing']
