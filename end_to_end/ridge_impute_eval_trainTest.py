@@ -3,8 +3,8 @@ import pandas as pd
 import pickle
 from data_split_tune_utils import X_y_site_split
 
-train = pd.read_csv('../data/train.csv', nrows=10000)
-test = pd.read_csv('../data/test.csv', nrows=10000)
+train = pd.read_csv('../data/train.csv')
+test = pd.read_csv('../data/test.csv')
 ridge_imputer = pickle.load(open('ridge_imputer.pkl', 'rb'))
 
 train_x, train_y, train_sites = X_y_site_split(train, y_var_name='MonitorData', site_var_name='site')
