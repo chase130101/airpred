@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+import itertools
+import sklearn.metrics
 
 def train_val_test_split(data, train_prop, test_prop, site_var_name='site'):
     """Splits data into train, validation, test sets by PM2.5 monitor site
@@ -120,10 +122,9 @@ def cross_validation(data, model, hyperparam_dict, num_folds, y_var_name='Monito
             test_x = x.loc[test_ind, :]
             test_y = y.loc[test_ind]
             
-            model_copy = model.copy()
             for i, key in zip(np.arange(len(combo)), list(hyperparam_dict.keys())):
                 setattr(model, key, combo[i])
-            
+
             model.fit(train_x, train_y)
             model_test_pred = model.predict(test_x)
             model_test_r2 = sklearn.metrics.r2_score(test_y, model_test_pred)
@@ -136,7 +137,7 @@ def cross_validation(data, model, hyperparam_dict, num_folds, y_var_name='Monito
         if combo == hyperparam_combos[0]:
             best_mean_r2 = np.mean(test_r2_list)
             best_combo = combo
-        elif mean_r2 < best_mean_r2:
+        elif mean_r2 > best_mean_r2:
             best_mean_r2 = np.mean(test_r2_list)
             best_combo = combo
             

@@ -8,7 +8,7 @@ from data_split_tune_utils import cross_validation_splits, X_y_site_split, cross
 np.random.seed(1)
 
 train = pd.read_csv('../data/train_ridgeImp.csv')
-# train = pd.read_csv('../data/train_rfImp.csv')
+#train = pd.read_csv('../data/train_rfImp.csv')
 train = train.dropna(axis=0)
 
 rf = sklearn.ensemble.RandomForestRegressor(n_estimators=500, random_state=1, n_jobs=-1)
