@@ -10,8 +10,8 @@ ridge_imputer = pickle.load(open('ridge_imputer.pkl', 'rb'))
 train_x, train_y, train_sites = X_y_site_split(train, y_var_name='MonitorData', site_var_name='site')
 test_x, test_y, test_sites = X_y_site_split(test, y_var_name='MonitorData', site_var_name='site')
 
-train_x_imp, train_r2_scores = ridge_imputer.transform(train_x, evaluate = True)
-test_x_imp, test_r2_scores = ridge_imputer.transform(test_x, evaluate = True)
+train_x_imp, train_r2_scores = ridge_imputer.transform(train_x, evaluate = True, backup_impute_strategy = 'mean')
+test_x_imp, test_r2_scores = ridge_imputer.transform(test_x, evaluate = True, backup_impute_strategy = 'mean')
 
 cols = ['site', 'MonitorData'] + list(train_x.columns)
 train_imp_df = pd.DataFrame(np.concatenate([train_sites.values.reshape(len(train_sites), -1),\
@@ -28,6 +28,8 @@ r2_scores_df = pd.DataFrame(np.concatenate([np.array(cols[2:]).reshape(len(cols)
                                               np.array(train_r2_scores).reshape(len(train_r2_scores), -1),\
                                               np.array(test_r2_scores).reshape(len(test_r2_scores), -1)], axis=1),\
                                               columns = ['Variable', 'Train_R2', 'Test_R2'])
+
+r2_scores_df.loc[max(r2_scores_df.index)+1, :] = ['Mean_R2'] + list(np.nanmean(r2_scores_df.iloc[:, 1:].values.astype(np.float64), axis=0))
 
 r2_scores_df.to_csv('../data/r2_scores_ridgeImp.csv', index = False)
 train_imp_df.to_csv('../data/train_ridgeImp.csv', index = False)

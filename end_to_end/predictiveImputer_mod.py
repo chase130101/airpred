@@ -54,7 +54,7 @@ class PredictiveImputer(BaseEstimator, TransformerMixin):
                 estimator_.fit(X_train, y_train)
                 if len(X_unk) > 0:
                     new_imputed[y_nan, i] = estimator_.predict(X_unk)
-                
+                    
             gamma = np.sum((new_imputed-imputed)**2)/np.sum(new_imputed**2)
             self.gamma_.append(gamma)
             print('Difference: ' + str(gamma))
@@ -70,7 +70,7 @@ class PredictiveImputer(BaseEstimator, TransformerMixin):
         
         return self
 
-    def transform(self, X, evaluate = True):
+    def transform(self, X, evaluate = True, backup_impute_strategy = 'mean'):
         check_is_fitted(self, ['statistics_', 'estimators_', 'gamma_'])
         X = check_array(X, copy=True, dtype=np.float64, force_all_finite=False)
         if X.shape[1] != self.statistics_.shape[1]:
@@ -94,12 +94,24 @@ class PredictiveImputer(BaseEstimator, TransformerMixin):
                 if len(X_unk) > 0:
                     imputed[y_nan, i] = estimator_.predict(X_unk)
             
-            if iter == self.num_iter-1 and evaluate == True:
                 X_known = X_s[~y_nan]
+                y_known = imputed[~y_nan, i]
                 pred = estimator_.predict(X_known)
-                r2 = r2_score(imputed[~y_nan, i], pred)
-                r2_list.append(r2)
-        
+                r2 = r2_score(y_known, pred)
+
+                if r2 < 0 and len(X_unk) > 0:
+                    backup_imputer = Imputer(strategy = backup_impute_strategy)
+                    backup_imputer.fit(y_known.reshape(y_known.shape[0], -1))
+                    imputed[y_nan, i] = np.repeat(backup_imputer.statistics_, imputed[y_nan, i].shape[0])
+                    pred = np.repeat(backup_imputer.statistics_, y_known.shape[0])
+                    r2 = r2_score(y_known, pred)
+                
+                if len(X_unk) == 0 and evaluate == True:
+                    r2 = np.nan
+
+                if iter == self.num_iter-1 and evaluate == True:
+                    r2_list.append(r2)
+
         if evaluate == True:
             self.r2_scores = r2_list
             return imputed, r2_list
