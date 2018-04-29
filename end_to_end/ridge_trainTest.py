@@ -16,7 +16,7 @@ test_x, test_y, test_sites = X_y_site_split(test, y_var_name='MonitorData', site
 
 best_hyperparams = pickle.load(open('best_ridge_hyperparams.pkl', 'rb'))
 ridge = sklearn.linear_model.Ridge(random_state=1, normalize=True, fit_intercept=True)
-for key in list(hyperparam_dict.keys()):
+for key in list(best_hyperparams.keys()):
     setattr(ridge, key, best_hyperparams[key])
     
 ridge.fit(train_x, train_y)
