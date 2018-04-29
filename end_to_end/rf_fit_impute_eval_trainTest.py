@@ -6,7 +6,7 @@ from predictiveImputer_mod import PredictiveImputer
 
 np.random.seed(1)
 
-data = pd.read_csv('../data/train.csv', nrows=500000)
+data = pd.read_csv('../data/train.csv')
 
 train, test = train_test_split(data, train_prop = 0.8, site_var_name = 'site')
 train1, train2 = train_test_split(train, train_prop = 0.3, site_var_name = 'site')
@@ -16,25 +16,25 @@ train2_x, train2_y, train2_sites = X_y_site_split(train2, y_var_name='MonitorDat
 test_x, test_y, test_sites = X_y_site_split(test, y_var_name='MonitorData', site_var_name='site')
 
 rf_imputer = PredictiveImputer(max_iter=10, initial_strategy='mean', f_model='RandomForest')
-rf_imputer.fit(train1_x, max_features=5, n_estimators=5, n_jobs=-1, verbose=1, random_state=1)
+rf_imputer.fit(train1_x, max_features=15, n_estimators=500, n_jobs=-1, verbose=0, random_state=1)
 
 train1_x_imp, train1_r2_scores_df = rf_imputer.transform(train1_x, evaluate = True, backup_impute_strategy = 'mean')
 train1_r2_scores_df.columns = ['Train1_R2', 'Train1_num_missing']
-train1_r2_scores_df.loc[max(train1_r2_scores_df.index)+1, :] = np.average(train1_r2_scores_df.loc[:, 'Train1_R2'].values,\
+train1_r2_scores_df.loc[max(train1_r2_scores_df.index)+1, :] = [np.average(train1_r2_scores_df.loc[:, 'Train1_R2'].values,\
                                                                    weights = train1_r2_scores_df.loc[:, 'Train1_num_missing'].values,\
-                                                                   axis=0)
+                                                                   axis=0), np.mean(train1_r2_scores_df.loc[:, 'Train1_num_missing'].values)]
     
 train2_x_imp, train2_r2_scores_df = rf_imputer.transform(train2_x, evaluate = True, backup_impute_strategy = 'mean')
 train2_r2_scores_df.columns = ['Train2_R2', 'Train2_num_missing']
-train2_r2_scores_df.loc[max(train2_r2_scores_df.index)+1, :] = np.average(train2_r2_scores_df.loc[:, 'Train2_R2'].values,\
+train2_r2_scores_df.loc[max(train2_r2_scores_df.index)+1, :] = [np.average(train2_r2_scores_df.loc[:, 'Train2_R2'].values,\
                                                                    weights = train2_r2_scores_df.loc[:, 'Train2_num_missing'].values,\
-                                                                   axis=0)
+                                                                   axis=0), np.mean(train2_r2_scores_df.loc[:, 'Train2_num_missing'].values)]
 
 test_x_imp, test_r2_scores_df = rf_imputer.transform(test_x, evaluate = True, backup_impute_strategy = 'mean')
 test_r2_scores_df.columns = ['Test_R2', 'Test_num_missing']
-test_r2_scores_df.loc[max(test_r2_scores_df.index)+1, :] = np.average(test_r2_scores_df.loc[:, 'Test_R2'].values,\
+test_r2_scores_df.loc[max(test_r2_scores_df.index)+1, :] = [np.average(test_r2_scores_df.loc[:, 'Test_R2'].values,\
                                                                    weights = test_r2_scores_df.loc[:, 'Test_num_missing'].values,\
-                                                                   axis=0)
+                                                                   axis=0), np.mean(test_r2_scores_df.loc[:, 'Test_num_missing'].values)]
 
 cols = ['site', 'MonitorData'] + list(train1_x.columns)
 train1_imp_df = pd.DataFrame(np.concatenate([train1_sites.values.reshape(len(train1_sites), -1),\
