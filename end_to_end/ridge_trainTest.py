@@ -1,9 +1,8 @@
 import pandas as pd
 import numpy as np
-from data_split_utils import X_y_site_split
 import sklearn.linear_model
 import sklearn.metrics
-import sklearn.preprocessing
+from data_split_tune_utils import X_y_site_split
 
 train = pd.read_csv('../data/train_ridgeImp.csv')
 test = pd.read_csv('../data/test_ridgeImp.csv')

@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestRegressor
@@ -6,7 +7,7 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.linear_model import Ridge
 from sklearn.preprocessing import Imputer
 from sklearn.utils.validation import check_array, check_is_fitted, check_X_y
-
+from sklearn.metrics import r2_score
 
 class PredictiveImputer(BaseEstimator, TransformerMixin):
     def __init__(self, max_iter=10, initial_strategy='mean', f_model='RandomForest'):
@@ -21,7 +22,7 @@ class PredictiveImputer(BaseEstimator, TransformerMixin):
         X_nan = np.isnan(X)
         least_by_nan = X_nan.sum(axis=0).argsort()
         self.least_by_nan = least_by_nan
-
+        
         imputed = self.initial_imputer.fit_transform(X)
         new_imputed = imputed.copy()
 
@@ -54,7 +55,7 @@ class PredictiveImputer(BaseEstimator, TransformerMixin):
                 estimator_.fit(X_train, y_train)
                 if len(X_unk) > 0:
                     new_imputed[y_nan, i] = estimator_.predict(X_unk)
-                
+                    
             gamma = np.sum((new_imputed-imputed)**2)/np.sum(new_imputed**2)
             self.gamma_.append(gamma)
             print('Difference: ' + str(gamma))
@@ -70,7 +71,7 @@ class PredictiveImputer(BaseEstimator, TransformerMixin):
         
         return self
 
-    def transform(self, X):
+    def transform(self, X, evaluate = True, backup_impute_strategy = 'mean'):
         check_is_fitted(self, ['statistics_', 'estimators_', 'gamma_'])
         X = check_array(X, copy=True, dtype=np.float64, force_all_finite=False)
         if X.shape[1] != self.statistics_.shape[1]:
@@ -80,6 +81,8 @@ class PredictiveImputer(BaseEstimator, TransformerMixin):
         X_nan = np.isnan(X)
         imputed = self.initial_imputer.fit_transform(X)
         
+        if evaluate == True:
+            r2_numNaN_matrix = np.zeros((imputed.shape[1], 2))
         for iter in range(self.num_iter):
             for i in self.least_by_nan:
                     
@@ -91,5 +94,27 @@ class PredictiveImputer(BaseEstimator, TransformerMixin):
                 estimator_ = self.estimators_[iter][i]
                 if len(X_unk) > 0:
                     imputed[y_nan, i] = estimator_.predict(X_unk)
+            
+                X_known = X_s[~y_nan]
+                y_known = imputed[~y_nan, i]
+                pred = estimator_.predict(X_known)
+                r2 = r2_score(y_known, pred)
 
-        return imputed
+                if r2 < 0:
+                    backup_imputer = Imputer(strategy = backup_impute_strategy)
+                    backup_imputer.fit(y_known.reshape(y_known.shape[0], -1))
+                    if len(X_unk) > 0:
+                        imputed[y_nan, i] = np.repeat(backup_imputer.statistics_, imputed[y_nan, i].shape[0])
+                    pred = np.repeat(backup_imputer.statistics_, y_known.shape[0])
+                    r2 = r2_score(y_known, pred)
+
+                if iter == self.num_iter-1 and evaluate == True:
+                    r2_numNaN_matrix[i, 0] = r2
+                    r2_numNaN_matrix[i, 1] = np.sum(y_nan)
+
+        if evaluate == True:
+            r2_numNaN_df = pd.DataFrame(r2_numNaN_matrix, columns = ['R2', 'num_missing'])
+            self.r2_scores_df = r2_numNaN_df
+            return imputed, r2_numNaN_df
+        else:
+            return imputed
