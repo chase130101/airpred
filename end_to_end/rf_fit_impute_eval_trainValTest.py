@@ -64,7 +64,7 @@ test_imp_df = pd.DataFrame(np.concatenate([test_sites.values.reshape(len(test_si
                                               test_x_imp], axis=1),\
                                               columns = cols)
 
-var_df = pd.DataFrame(np.array(cols[2:] + ['Weighted_Mean_R2']).reshape(len(cols)-2, -1), columns = ['Variable'])
+var_df = pd.DataFrame(np.array(cols[2:] + ['Weighted_Mean_R2']).reshape(len(cols)-2+1, -1), columns = ['Variable'])
 r2_scores_df = pd.concat([var_df, train1_r2_scores_df, train2_r2_scores_df, val_r2_scores_df, test_r2_scores_df], axis=1)
 
 train_imp_df = pd.concat([train1_imp_df, train2_imp_df])

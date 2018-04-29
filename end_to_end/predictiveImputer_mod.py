@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestRegressor
@@ -20,9 +21,7 @@ class PredictiveImputer(BaseEstimator, TransformerMixin):
 
         X_nan = np.isnan(X)
         least_by_nan = X_nan.sum(axis=0).argsort()
-        num_nan_least_to_greatest = np.sort(X_nan.sum(axis=0))
         self.least_by_nan = least_by_nan
-        self.num_nan_least_to_greatest = num_nan_least_to_greatest
         
         imputed = self.initial_imputer.fit_transform(X)
         new_imputed = imputed.copy()
@@ -85,7 +84,7 @@ class PredictiveImputer(BaseEstimator, TransformerMixin):
         if evaluate == True:
             r2_numNaN_matrix = np.zeros((imputed.shape[1], 2))
         for iter in range(self.num_iter):
-            for i, num_nan in zip(self.least_by_nan, self.num_nan_least_to_greatest):
+            for i in self.least_by_nan:
                     
                 X_s = np.delete(imputed, i, 1)
                 y_nan = X_nan[:, i]
@@ -111,7 +110,7 @@ class PredictiveImputer(BaseEstimator, TransformerMixin):
 
                 if iter == self.num_iter-1 and evaluate == True:
                     r2_numNaN_matrix[i, 0] = r2
-                    r2_numNaN_matrix[i, 1] = num_nan
+                    r2_numNaN_matrix[i, 1] = np.sum(y_nan)
 
         if evaluate == True:
             r2_numNaN_df = pd.DataFrame(r2_numNaN_matrix, columns = ['R2', 'num_missing'])

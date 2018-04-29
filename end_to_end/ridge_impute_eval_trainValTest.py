@@ -14,21 +14,21 @@ test_x, test_y, test_sites = X_y_site_split(test, y_var_name='MonitorData', site
 
 train_x_imp, train_r2_scores_df = ridge_imputer.transform(train_x, evaluate = True, backup_impute_strategy = 'mean')
 train_r2_scores_df.columns = ['Train_R2', 'Train_num_missing']
-train_r2_scores_df.loc[max(train_r2_scores_df.index)+1, :] = np.average(train_r2_scores_df.loc[:, 'Train_R2'].values,\
+train_r2_scores_df.loc[max(train_r2_scores_df.index)+1, :] = [np.average(train_r2_scores_df.loc[:, 'Train_R2'].values,\
                                                                    weights = train_r2_scores_df.loc[:, 'Train_num_missing'].values,\
-                                                                   axis=0)
+                                                                   axis=0), np.mean(train_r2_scores_df.loc[:, 'Train_num_missing'].values)]
 
 val_x_imp, val_r2_scores_df = ridge_imputer.transform(val_x, evaluate = True, backup_impute_strategy = 'mean')
 val_r2_scores_df.columns = ['Val_R2', 'Val_num_missing']
-val_r2_scores_df.loc[max(val_r2_scores_df.index)+1, :] = np.average(val_r2_scores_df.loc[:, 'Val_R2'].values,\
+val_r2_scores_df.loc[max(val_r2_scores_df.index)+1, :] = [np.average(val_r2_scores_df.loc[:, 'Val_R2'].values,\
                                                                    weights = val_r2_scores_df.loc[:, 'Val_num_missing'].values,\
-                                                                   axis=0)
+                                                                   axis=0), np.mean(val_r2_scores_df.loc[:, 'Val_num_missing'].values)]
 
 test_x_imp, test_r2_scores_df = ridge_imputer.transform(test_x, evaluate = True, backup_impute_strategy = 'mean')
 test_r2_scores_df.columns = ['Test_R2', 'Test_num_missing']
-test_r2_scores_df.loc[max(test_r2_scores_df.index)+1, :] = np.average(test_r2_scores_df.loc[:, 'Test_R2'].values,\
+test_r2_scores_df.loc[max(test_r2_scores_df.index)+1, :] = [np.average(test_r2_scores_df.loc[:, 'Test_R2'].values,\
                                                                    weights = test_r2_scores_df.loc[:, 'Test_num_missing'].values,\
-                                                                   axis=0)
+                                                                   axis=0), np.mean(test_r2_scores_df.loc[:, 'Test_num_missing'].values)]
 
 cols = ['site', 'MonitorData'] + list(train_x.columns)
 train_imp_df = pd.DataFrame(np.concatenate([train_sites.values.reshape(len(train_sites), -1),\
@@ -46,7 +46,7 @@ test_imp_df = pd.DataFrame(np.concatenate([test_sites.values.reshape(len(test_si
                                               test_x_imp], axis=1),\
                                               columns = cols)
 
-var_df = pd.DataFrame(np.array(cols[2:] + ['Weighted_Mean_R2']).reshape(len(cols)-2, -1), columns = ['Variable'])
+var_df = pd.DataFrame(np.array(cols[2:] + ['Weighted_Mean_R2']).reshape(len(cols)-2+1, -1), columns = ['Variable'])
 r2_scores_df = pd.concat([var_df, train_r2_scores_df, val_r2_scores_df, test_r2_scores_df], axis=1)
 
 r2_scores_df.to_csv('../data/r2_scoresV_ridgeImp.csv', index = False)
