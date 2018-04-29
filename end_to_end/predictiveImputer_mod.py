@@ -20,8 +20,10 @@ class PredictiveImputer(BaseEstimator, TransformerMixin):
 
         X_nan = np.isnan(X)
         least_by_nan = X_nan.sum(axis=0).argsort()
+        num_nan_least_to_greatest = np.sort(X_nan.sum(axis=0))
         self.least_by_nan = least_by_nan
-
+        self.num_nan_least_to_greatest = num_nan_least_to_greatest
+        
         imputed = self.initial_imputer.fit_transform(X)
         new_imputed = imputed.copy()
 
@@ -81,9 +83,9 @@ class PredictiveImputer(BaseEstimator, TransformerMixin):
         imputed = self.initial_imputer.fit_transform(X)
         
         if evaluate == True:
-            r2_list = []
+            r2_numNaN_matrix = np.zeros((imputed.shape[1], 2))
         for iter in range(self.num_iter):
-            for i in self.least_by_nan:
+            for i, num_nan in zip(self.least_by_nan, self.num_nan_least_to_greatest):
                     
                 X_s = np.delete(imputed, i, 1)
                 y_nan = X_nan[:, i]
@@ -99,21 +101,21 @@ class PredictiveImputer(BaseEstimator, TransformerMixin):
                 pred = estimator_.predict(X_known)
                 r2 = r2_score(y_known, pred)
 
-                if r2 < 0 and len(X_unk) > 0:
+                if r2 < 0:
                     backup_imputer = Imputer(strategy = backup_impute_strategy)
                     backup_imputer.fit(y_known.reshape(y_known.shape[0], -1))
-                    imputed[y_nan, i] = np.repeat(backup_imputer.statistics_, imputed[y_nan, i].shape[0])
+                    if len(X_unk) > 0:
+                        imputed[y_nan, i] = np.repeat(backup_imputer.statistics_, imputed[y_nan, i].shape[0])
                     pred = np.repeat(backup_imputer.statistics_, y_known.shape[0])
                     r2 = r2_score(y_known, pred)
-                
-                if len(X_unk) == 0 and evaluate == True:
-                    r2 = np.nan
 
                 if iter == self.num_iter-1 and evaluate == True:
-                    r2_list.append(r2)
+                    r2_numNaN_matrix[i, 0] = r2
+                    r2_numNaN_matrix[i, 1] = num_nan
 
         if evaluate == True:
-            self.r2_scores = r2_list
-            return imputed, r2_list
+            r2_numNaN_df = pd.DataFrame(r2_numNaN_matrix, columns = ['R2', 'num_missing'])
+            self.r2_scores_df = r2_numNaN_df
+            return imputed, r2_numNaN_df
         else:
             return imputed
