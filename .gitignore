@@ -4,7 +4,7 @@
 .Ruserdata
 .DS_Store
 *.ipynb_checkpoints
-*.pkl
+end_to_end/ridge_imputer.pkl
 *__pycache__
 data/assembled_data*
 data/census_data.csv
