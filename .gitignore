@@ -25,4 +25,5 @@ data/trainV.csv
 data/valV.csv
 data/testV.csv
 data/*Pred.csv
+data/r2*.csv
 
