@@ -6,7 +6,7 @@ from data_split_tune_utils import X_y_site_split
 train = pd.read_csv('../data/trainV.csv')
 val = pd.read_csv('../data/valV.csv')
 test = pd.read_csv('../data/testV.csv')
-ridge_imputer = pickle.load(open('ridge_imputer2.pkl', 'rb'))
+ridge_imputer = pickle.load(open('ridge_imputer.pkl', 'rb'))
 
 train_x, train_y, train_sites = X_y_site_split(train, y_var_name='MonitorData', site_var_name='site')
 val_x, val_y, val_sites = X_y_site_split(val, y_var_name='MonitorData', site_var_name='site')
@@ -49,7 +49,7 @@ test_imp_df = pd.DataFrame(np.concatenate([test_sites.values.reshape(len(test_si
 var_df = pd.DataFrame(np.array(cols[2:] + ['Weighted_Mean_R2']).reshape(len(cols)-2+1, -1), columns = ['Variable'])
 r2_scores_df = pd.concat([var_df, train_r2_scores_df, val_r2_scores_df, test_r2_scores_df], axis=1)
 
-r2_scores_df.to_csv('../data/r2_scoresV_ridgeImp2.csv', index = False)
-train_imp_df.to_csv('../data/trainV_ridgeImp2.csv', index = False)
-val_imp_df.to_csv('../data/valV_ridgeImp2.csv', index = False)
-test_imp_df.to_csv('../data/testV_ridgeImp2.csv', index = False)
+r2_scores_df.to_csv('../data/r2_scoresV_ridgeImp.csv', index = False)
+train_imp_df.to_csv('../data/trainV_ridgeImp.csv', index = False)
+val_imp_df.to_csv('../data/valV_ridgeImp.csv', index = False)
+test_imp_df.to_csv('../data/testV_ridgeImp.csv', index = False)

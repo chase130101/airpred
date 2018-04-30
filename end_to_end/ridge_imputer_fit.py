@@ -13,4 +13,4 @@ train1_x, train1_y, train1_sites = X_y_site_split(train1, y_var_name='MonitorDat
 ridge_imputer = PredictiveImputer(max_iter=10, initial_strategy='mean', f_model='Ridge')
 ridge_imputer.fit(train1_x, alpha=0.0001, fit_intercept=True, normalize=True, random_state=1)
 
-pickle.dump(ridge_imputer, open('ridge_imputer2.pkl', 'wb'))
+pickle.dump(ridge_imputer, open('ridge_imputer.pkl', 'wb'))
