@@ -6,9 +6,9 @@ from predictiveImputer_mod import PredictiveImputer
 
 np.random.seed(1)
 
-data = pd.read_csv('../data/train.csv')
+train = pd.read_csv('../data/train.csv')
+test = pd.read_csv('../data/test.csv')
 
-train, test = train_test_split(data, train_prop = 0.8, site_var_name = 'site')
 train1, train2 = train_test_split(train, train_prop = 0.3, site_var_name = 'site')
 
 train1_x, train1_y, train1_sites = X_y_site_split(train1, y_var_name='MonitorData', site_var_name='site')

@@ -8,6 +8,9 @@ from data_split_tune_utils import X_y_site_split
 from CNN_utils import split_sizes_site, split_data, pad_stack_splits, get_monitorData_indices, r2, get_nonConst_vars
 from CNN_architecture import CNN 
 
+np.random.seed(1)
+torch.manual_seed(1)
+
 ### read in train, val, and test
 train = pd.read_csv('../data/trainV_ridgeImp.csv')
 val = pd.read_csv('../data/valV_ridgeImp.csv')
