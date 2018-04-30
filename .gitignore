@@ -4,8 +4,8 @@
 .Ruserdata
 .DS_Store
 *.ipynb_checkpoints
-end_to_end/ridge_imputer.pkl
 *__pycache__
+*.pkl
 data/assembled_data*
 data/census_data.csv
 data/train_ridgeImp.csv
@@ -25,3 +25,4 @@ data/trainV.csv
 data/valV.csv
 data/testV.csv
 data/*Pred.csv
+
