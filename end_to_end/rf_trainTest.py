@@ -15,7 +15,7 @@ train_x, train_y, train_sites = X_y_site_split(train, y_var_name='MonitorData', 
 test_x, test_y, test_sites = X_y_site_split(test, y_var_name='MonitorData', site_var_name='site')
 
 best_hyperparams = pickle.load(open('best_rf_hyperparams.pkl', 'rb'))
-rf = sklearn.ensemble.RandomForestRegressor(n_estimators=500, random_state=1, n_jobs=-1)
+rf = sklearn.ensemble.RandomForestRegressor(n_estimators=300, random_state=1, n_jobs=-1)
 for key in list(best_hyperparams.keys()):
     setattr(rf, key, best_hyperparams[key])
     
