@@ -1,10 +1,11 @@
 import numpy as np
-import sklearn.metrics
 import torch
 from torch.autograd import Variable
+import sklearn.metrics
 
 def split_sizes_site(sites):
     """Gets the split sizes to split dataset by site for a dataset with multiple sites.
+    Assumes that site-days for with the same site are in blocks of rows in dataset
     
     Arguments:
         sites (array): array indicating the site of each row 
@@ -39,17 +40,17 @@ def split_data(tensor, split_sizes, dim=0):
     if dim_size != torch.sum(torch.Tensor(split_sizes)):
         raise KeyError("Sum of split sizes exceeds tensor dim")
     
-    splits = torch.cumsum(torch.Tensor([0] + split_sizes), dim=0)[:-1]
+    splits = torch.cumsum(torch.Tensor([0]+split_sizes), dim=0)[:-1]
     return tuple(tensor.narrow(int(dim), int(start), int(length)) 
-        for start, length in zip(splits, split_sizes))
+                 for start, length in zip(splits, split_sizes))
 
 
 def pad_stack_splits(site_tuple, split_sizes, x_or_y):
-    """Zero (x) or nan (y) pads site data sequences and stacks them into a matrix.
+    """Zero (x) or nan (y) pads site sequences and stacks them into a matrix.
     
     Arguments:
-        site_tuple (tuple): tuple of site data sequences to pad and stack
-        split_sizes (array): lengths of site data sequences
+        site_tuple (tuple): tuple of site sequences to pad and stack
+        split_sizes (array): lengths of site sequences
         x_or_y (string): 'x' or 'y' indicating whether to pad and stack x or y
     """
     data_padded_list = []
@@ -57,25 +58,25 @@ def pad_stack_splits(site_tuple, split_sizes, x_or_y):
         max_sequence_length = torch.max(torch.from_numpy(split_sizes))
 
         if x_or_y == 'x':
-            zero_padding_rows = torch.zeros(max_sequence_length - sequence.size()[0], sequence.size()[1])
-            data_padded_list.append(torch.cat((sequence, zero_padding_rows), dim = 0))
+            zero_padding_rows = torch.zeros(max_sequence_length-sequence.size()[0], sequence.size()[1])
+            data_padded_list.append(torch.cat((sequence, zero_padding_rows), dim=0))
             
         elif x_or_y == 'y':
-            nan_padding = torch.zeros(max_sequence_length - sequence.size()[0]).double() * np.nan
-            data_padded_list.append(torch.cat((sequence, nan_padding), dim = 0))
+            nan_padding = torch.zeros(max_sequence_length - sequence.size()[0]).double()*np.nan
+            data_padded_list.append(torch.cat((sequence, nan_padding), dim=0))
             
-    return torch.stack(data_padded_list, dim = 0)
+    return torch.stack(data_padded_list, dim=0)
 
 
 def get_monitorData_indices(sequence):
-    """Gets indices for a site data sequence for which there is an output for MonitorData.
+    """Gets indices for a site sequence for which there is an output for MonitorData.
     
     Arguments:
-        sequence (tensor): sequence of MonitorData outputs for a given site, including NaNs
+        sequence (Tensor): sequence of MonitorData outputs for a given site, including NaNs
     """
     response_indicator_vec = sequence == sequence
     num_responses = torch.sum(response_indicator_vec)
-    response_indices = torch.sort(response_indicator_vec, dim = 0, descending = True)[1][:num_responses]
+    response_indices = torch.sort(response_indicator_vec, dim=0, descending=True)[1][:num_responses]
     ordered_response_indices = torch.sort(response_indices)[0]
     return ordered_response_indices
 
@@ -86,7 +87,7 @@ def r2(model, batch_size, x_stack_nonConst, x_tuple, y_tuple):
     Arguments:
         model (torch): model to test
         batch_size (int): to determine how many sequences to read in at a time
-        x_stack (tensor): stack of site data sequences
+        x_stack (tensor): stack of site sequences
         y_tuple (tuple): tuple of true y values by sequence, including NaNs
     """
     y = []
@@ -94,17 +95,17 @@ def r2(model, batch_size, x_stack_nonConst, x_tuple, y_tuple):
     
     # get number of batches
     if x_stack_nonConst.size()[0] % batch_size != 0:
-        num_batches = int(np.floor(x_stack_nonConst.size()[0]/batch_size) + 1)
+        num_batches = int(np.floor(x_stack_nonConst.size()[0]/batch_size)+1)
     else:
         num_batches = int(x_stack_nonConst.size()[0]/batch_size)
         
     for batch in range(num_batches):
         # get x and y for this batch
-        x_stack_batch_nonConst = x_stack_nonConst[batch_size * batch:batch_size * (batch+1)]
-        x_tuple_batch = x_tuple[batch_size * batch:batch_size * (batch+1)]
-        y_tuple_nans = y_tuple[batch_size * batch:batch_size * (batch+1)]
+        x_stack_batch_nonConst = x_stack_nonConst[batch_size*batch:batch_size*(batch+1)]
+        x_tuple_batch = x_tuple[batch_size*batch:batch_size*(batch+1)]
+        y_tuple_nans = y_tuple[batch_size*batch:batch_size*(batch+1)]
         
-        # get indices for monitor data and actual monitor data
+        # get indices for which there is monitor data, associated monitor data values and inputs
         y_by_site = []
         x_by_site = []
         y_ind_by_site = []
@@ -126,11 +127,11 @@ def r2(model, batch_size, x_stack_nonConst, x_tuple, y_tuple):
     return sklearn.metrics.r2_score(y, pred)
 
 
-def get_nonConst_vars(data, site_var_name = 'site', y_var_name = 'MonitorData', cutoff = 1000):
-    """Get column names for variables that are not constant within a sensor sequence
+def get_nonConst_vars(data, site_var_name='site', y_var_name='MonitorData', cutoff=1000):
+    """Get column names for variables that are not constant within a site sequence
     
     Arguments:
-        data (pandas dataframe): For checking if variables are non-constant
+        data (pandas.DataFrame): For checking if variables are non-constant
         site_var_name (str): Column name for monitor site
         y_var_name (str): Column name for monitor output
         cutoff (int): Number of unique values a variable needs to have to be considered non-constant

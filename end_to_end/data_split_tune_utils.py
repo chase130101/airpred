@@ -7,17 +7,17 @@ def train_val_test_split(data, train_prop, test_prop, site_var_name='site'):
     """Splits data into train, validation, test sets by PM2.5 monitor site
     
     Arguments:
-        data (pandas dataframe): Data to be split
-        site_var_name (string): Site ID variable name
+        data (pd.DataFrame): Data to be split
+        site_var_name (str): Site ID variable name
         train_prop (float): Proportion of sites to be put into train set
         test_prop (float): Proportion of non-train sites to be put into test set
     """
     # get sites for val/test data
-    val_test_sites = np.random.choice(np.unique(data[site_var_name].values), round(len(np.unique(data[site_var_name].values))*(1-train_prop)), replace = False)
+    val_test_sites = np.random.choice(np.unique(data[site_var_name].values), round(len(np.unique(data[site_var_name].values))*(1-train_prop)), replace=False)
     
     # get sites for test data
     test_prop = test_prop/(1-train_prop)
-    test_sites = np.random.choice(np.unique(val_test_sites), round(len(np.unique(val_test_sites))*test_prop), replace = False)
+    test_sites = np.random.choice(np.unique(val_test_sites), round(len(np.unique(val_test_sites))*test_prop), replace=False)
     
     # get train, val, and test
     train = data[~data[site_var_name].isin(val_test_sites)]
@@ -31,12 +31,12 @@ def train_test_split(data, train_prop, site_var_name='site'):
     """Splits data into train test sets by PM2.5 monitor site
     
     Arguments:
-        data (pandas dataframe): Data to be split
-        site_var_name (string): Site ID variable name
+        data (pandas.DataFrame): Data to be split
+        site_var_name (str): Site ID variable name
         train_prop (float): Proportion of sites to be put into train set
     """
     # get sites for train data
-    train_sites = np.random.choice(np.unique(data[site_var_name].values), round(len(np.unique(data[site_var_name].values))*train_prop), replace = False)
+    train_sites = np.random.choice(np.unique(data[site_var_name].values), round(len(np.unique(data[site_var_name].values))*train_prop), replace=False)
         
     # get train and test
     train = data[data[site_var_name].isin(train_sites)]
@@ -49,9 +49,9 @@ def X_y_site_split(data, y_var_name='MonitorData', site_var_name='site'):
     """Splits a dataframe into X, y, site ID
     
     Arguments:
-        data (pandas dataframe): Data to be split
+        data (pandas.DataFrame): Data to be split
         y_var_name (string): Response variable name
-        site_var_name (string): Site ID variable name
+        site_var_name (str): Site ID variable name
     """
     data_y = data.loc[:, y_var_name]
     data_sites = data.loc[:, site_var_name]
@@ -61,19 +61,19 @@ def X_y_site_split(data, y_var_name='MonitorData', site_var_name='site'):
 
 
 def cross_validation_splits(data, num_folds, site_var_name='site'):
-    """Returns indices for cross-validation train, test splits for use in GridSearchCV
-    Sensor-days with same site ID don't get split up
+    """Returns indices for cross-validation train, test splits
+    Site-days with same site ID don't get split up
     
     Arguments:
-        data (pandas dataframe): Data to be split
+        data (pandas.DataFrame): Data to be split
         site_var_name (string): Site ID variable name
-        num_folds (int): Number of cross_validation folds
+        num_folds (int): Number of cross-validation folds
     """
     # get site ids for each fold
     try:
-        site_ids_by_fold = np.random.choice(np.unique(data[site_var_name].values), (num_folds, round(len(np.unique(data[site_var_name].values))/num_folds)), replace = False)
+        site_ids_by_fold = np.random.choice(np.unique(data[site_var_name].values), (num_folds, round(len(np.unique(data[site_var_name].values))/num_folds)), replace=False)
     except ValueError:
-        site_ids_by_fold = np.random.choice(np.unique(data[site_var_name].values), (num_folds, round(len(np.unique(data[site_var_name].values))/(num_folds+1))), replace = False)
+        site_ids_by_fold = np.random.choice(np.unique(data[site_var_name].values), (num_folds, round(len(np.unique(data[site_var_name].values))/(num_folds+1))), replace=False)
     site_ids_by_fold = [list(site_ids_by_fold[i]) for i in range(num_folds)]
     leftover_sites = list(np.unique(data[~data[site_var_name].isin(np.unique(site_ids_by_fold))][site_var_name]))
     site_ids_by_fold[0] += leftover_sites
@@ -84,7 +84,7 @@ def cross_validation_splits(data, num_folds, site_var_name='site'):
         ind_fold_i = list(data[data[site_var_name].isin(site_ids_by_fold[i])].index)
         ind_by_fold.append(ind_fold_i)
     
-    # produce cross-validation train test splits based on indices
+    # produce cross-validation train, test splits based on indices
     train_test_splits = []
     for i in range(num_folds):
         test_i = np.array(ind_by_fold[i])
@@ -98,16 +98,19 @@ def cross_validation(data, model, hyperparam_dict, num_folds, y_var_name='Monito
     """Returns best cross-validation R^2 and dictionary of best model hyper-parameters
     
     Arguments:
-        data (pandas dataframe): To use for cross-validation
+        data (pandas.DataFrame): To use for folds in cross-validation
         model (sklearn model): Model to tune
         hyperparam_dict (dict): Model hyper-parameters to grid search
-        num_folds (int): Number of cross_validation folds
+        num_folds (int): Number of cross-validation folds
         y_var_name (string): Response variable name
         site_var_name (string): Site ID variable name
     """
-    cv_splits = cross_validation_splits(data, num_folds, site_var_name='site')
-    x, y, sites = X_y_site_split(data, y_var_name='MonitorData', site_var_name='site')
+    # indices for cv train, test splits
+    cv_splits = cross_validation_splits(data, num_folds, site_var_name=site_var_name)
+
+    x, y, sites = X_y_site_split(data, y_var_name=y_var_name, site_var_name=site_var_name)
     
+    # get all hyper-parameter combinations based on input dictionary
     hyperparam_lists = [hyperparam_dict[list(hyperparam_dict.keys())[i]] for i in range(len(hyperparam_dict.keys()))]
     hyperparam_combos = list(itertools.product(*hyperparam_lists))
     
@@ -122,6 +125,7 @@ def cross_validation(data, model, hyperparam_dict, num_folds, y_var_name='Monito
             test_x = x.loc[test_ind, :]
             test_y = y.loc[test_ind]
             
+            # set model attributes based on current combination of hyper-parameters being tested
             for i, key in zip(np.arange(len(combo)), list(hyperparam_dict.keys())):
                 setattr(model, key, combo[i])
 
@@ -134,13 +138,15 @@ def cross_validation(data, model, hyperparam_dict, num_folds, y_var_name='Monito
         mean_r2 = np.mean(test_r2_list)
         mean_r2_list.append(mean_r2)
         
+        # keep track of best hyper-parameter combination and best mean R^2
         if combo == hyperparam_combos[0]:
             best_mean_r2 = np.mean(test_r2_list)
             best_combo = combo
         elif mean_r2 > best_mean_r2:
             best_mean_r2 = np.mean(test_r2_list)
             best_combo = combo
-            
+    
+    # put best hyper-parameter combination into dictionary
     best_combo_dict = {}
     for i, key in zip(np.arange(len(best_combo)), list(hyperparam_dict.keys())):
         best_combo_dict[key] = best_combo[i]
