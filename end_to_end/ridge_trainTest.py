@@ -5,8 +5,8 @@ import sklearn.metrics
 import pickle
 from data_split_tune_utils import X_y_site_split
 
-train = pd.read_csv('../data/train_ridgeImp2.csv')
-test = pd.read_csv('../data/test_ridgeImp2.csv')
+train = pd.read_csv('../data/train_ridgeImp.csv')
+test = pd.read_csv('../data/test_ridgeImp.csv')
 #train = pd.read_csv('../data/train_rfImp.csv')
 #test = pd.read_csv('../data/test_rfImp.csv')
 train = train.dropna(axis=0)
@@ -25,5 +25,5 @@ test_r2_ridge = sklearn.metrics.r2_score(test_y, test_pred_ridge)
 print('Test R^2: ' + str(test_r2_ridge))
 
 test['MonitorData_pred'] = pd.Series(test_pred_ridge, index=test.index)
-test.to_csv('../data/test_ridgePred2.csv', index=False)
-pickle.dump(ridge, open('ridge_final2.pkl', 'wb'))
+test.to_csv('../data/test_ridgePred.csv', index=False)
+pickle.dump(ridge, open('ridge_final.pkl', 'wb'))
