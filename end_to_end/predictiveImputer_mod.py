@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import copy
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestRegressor
@@ -30,11 +31,14 @@ class PredictiveImputer(BaseEstimator, TransformerMixin):
         self.gamma_ = []
 
         if self.f_model == 'RandomForest':                                             
-            self.estimators_ = [[RandomForestRegressor(**kwargs) for i in range(X.shape[1])] for j in range(self.max_iter)]
+            #self.estimators_ = [[RandomForestRegressor(**kwargs) for i in range(X.shape[1])] for j in range(self.max_iter)]
+            self.estimators_ = [RandomForestRegressor(**kwargs) for i in range(X.shape[1])]
         if self.f_model == 'Ridge':                                             
-            self.estimators_ = [[Ridge(**kwargs) for i in range(X.shape[1])] for j in range(self.max_iter)]
+            #self.estimators_ = [[Ridge(**kwargs) for i in range(X.shape[1])] for j in range(self.max_iter)]
+            self.estimators_ = [Ridge(**kwargs) for i in range(X.shape[1])]
         elif self.f_model == 'KNN':
-            self.estimators_ = [[KNeighborsRegressor(n_neighbors=min(5, sum(~X_nan[:, i])), **kwargs) for i in range(X.shape[1])] for j in range(self.max_iter)]
+            #self.estimators_ = [[KNeighborsRegressor(n_neighbors=min(5, sum(~X_nan[:, i])), **kwargs) for i in range(X.shape[1])] for j in range(self.max_iter)]
+            self.estimators_ = [KNeighborsRegressor(n_neighbors=min(5, sum(~X_nan[:, i])), **kwargs) for i in range(X.shape[1])]
         
         print('Number of variables: ' + str(len(least_by_nan)))
         for iter in range(self.max_iter):
@@ -50,8 +54,9 @@ class PredictiveImputer(BaseEstimator, TransformerMixin):
                 X_train = X_s[~y_nan]
                 y_train = new_imputed[~y_nan, i]
                 X_unk = X_s[y_nan]
+                
 
-                estimator_ = self.estimators_[iter][i]
+                estimator_ = self.estimators_[i]
                 estimator_.fit(X_train, y_train)
                 if len(X_unk) > 0:
                     new_imputed[y_nan, i] = estimator_.predict(X_unk)
@@ -60,14 +65,17 @@ class PredictiveImputer(BaseEstimator, TransformerMixin):
             self.gamma_.append(gamma)
             print('Difference: ' + str(gamma))
             print()
-            imputed = new_imputed.copy()
             if iter >= 1:
                 if self.gamma_[iter] >= self.gamma_[iter-1]:
                     self.num_iter = iter
-                    self.estimators_ = self.estimators_[:self.num_iter]
+                    self.estimators_ = list(old_estimators)
                     break
                 elif iter == self.max_iter-1:
                     self.num_iter = iter+1
+                    break
+                    
+            imputed = new_imputed.copy()
+            old_estimators = tuple(self.estimators_)
         
         return self
 
@@ -91,7 +99,7 @@ class PredictiveImputer(BaseEstimator, TransformerMixin):
 
                 X_unk = X_s[y_nan]
                     
-                estimator_ = self.estimators_[iter][i]
+                estimator_ = self.estimators_[i]
                 if len(X_unk) > 0:
                     imputed[y_nan, i] = estimator_.predict(X_unk)
             

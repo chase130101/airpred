@@ -27,7 +27,11 @@ print('Test R^2: ' + str(test_r2_xgboost))
 
 test['MonitorData_pred'] = pd.Series(test_pred_xgboost, index=test.index)
 test.to_csv('../data/test_xgboostPred.csv', index=False)
-pickle.dump(xgboost, open('xgboost_final.pkl', 'wb'))
+#pickle.dump(xgboost, open('xgboost_final.pkl', 'wb'))
+
+feature_importance_df = pd.DataFrame(xgboost.feature_importances_.reshape(len(xgboost.feature_importances_), -1), columns=['XGBoost_Feature_Importance'])
+feature_importance_df['Variable'] = pd.Series(train_x.columns, index=feature_importance_df.index)
+feature_importance_df.to_csv('../data/xgboost_feature_importances.csv', index=False)  
 
 #Variable importance plot
 #xgb.plot_importance(model, max_num_features=20)
