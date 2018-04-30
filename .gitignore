@@ -6,7 +6,7 @@
 *.ipynb_checkpoints
 *.pkl
 *__pycache__
-data/assembled_data.csv
+data/assembled_data*
 data/census_data.csv
 data/train_ridgeImp.csv
 data/train_rfImp.csv
@@ -19,9 +19,9 @@ data/test_rfImp.csv
 data/testV_ridgeImp.csv
 data/testV_rfImp.csv
 data/data_to_impute.csv
-data/*.rds
 data/train.csv
 data/test.csv
 data/trainV.csv
 data/valV.csv
 data/testV.csv
+data/*Pred.csv

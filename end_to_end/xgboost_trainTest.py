@@ -25,6 +25,10 @@ test_pred_xgboost = xgboost.predict(test_x)
 test_r2_xgboost = sklearn.metrics.r2_score(test_y, test_pred_xgboost)
 print('Test R^2: ' + str(test_r2_xgboost))
 
+test['MonitorData_pred'] = pd.Series(test_pred_xgboost, index=test.index)
+test.to_csv('../data/test_xgboostPred.csv', index=False)
+pickle.dump(xgboost, open('xgboost_final.pkl', 'wb'))
+
 #Variable importance plot
 #xgb.plot_importance(model, max_num_features=20)
 #pyplot.show()

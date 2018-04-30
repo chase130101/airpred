@@ -23,3 +23,7 @@ rf.fit(train_x, train_y)
 test_pred_rf = rf.predict(test_x)
 test_r2_rf = sklearn.metrics.r2_score(test_y, test_pred_rf)
 print('Test R^2: ' + str(test_r2_rf))
+
+test['MonitorData_pred'] = pd.Series(test_pred_rf, index=test.index)
+test.to_csv('../data/test_rfPred.csv', index=False)
+pickle.dump(rf, open('rf_final.pkl', 'wb'))

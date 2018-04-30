@@ -23,3 +23,7 @@ ridge.fit(train_x, train_y)
 test_pred_ridge = ridge.predict(test_x)
 test_r2_ridge = sklearn.metrics.r2_score(test_y, test_pred_ridge)
 print('Test R^2: ' + str(test_r2_ridge))
+
+test['MonitorData_pred'] = pd.Series(test_pred_ridge, index=test.index)
+test.to_csv('../data/test_ridgePred.csv', index=False)
+pickle.dump(ridge, open('ridge_final.pkl', 'wb'))
