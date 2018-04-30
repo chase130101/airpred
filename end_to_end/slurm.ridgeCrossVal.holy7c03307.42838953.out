@@ -1,0 +1,2 @@
+Cross-validation R^2: 0.759262336026
+Best hyper-parameters: {'alpha': 0.0001}
