@@ -5,10 +5,10 @@ import sklearn.metrics
 import pickle
 from data_split_tune_utils import X_y_site_split
 
-train = pd.read_csv('../data/train_ridgeImp.csv')
-test = pd.read_csv('../data/test_ridgeImp.csv')
-#train = pd.read_csv('../data/train_rfImp.csv')
-#test = pd.read_csv('../data/test_rfImp.csv')
+#train = pd.read_csv('../data/train_ridgeImp.csv')
+#test = pd.read_csv('../data/test_ridgeImp.csv')
+train = pd.read_csv('../data/train_rfImp.csv')
+test = pd.read_csv('../data/test_rfImp.csv')
 
 # drop rows with no monitor data response value
 train = train.dropna(axis=0)
@@ -38,10 +38,10 @@ print('Test R^2: ' + str(test_r2_rf))
 test['MonitorData_pred'] = pd.Series(test_pred_rf, index=test.index)
 
 # save test dataframe with predictions
-test.to_csv('../data/test_rfPred.csv', index=False)
+test.to_csv('../data/test_rfPred_rfImp.csv', index=False)
 #pickle.dump(rf, open('rf_final.pkl', 'wb'))
 
 # create dataframe of feature importances and save
 feature_importance_df = pd.DataFrame(rf.feature_importances_.reshape(len(rf.feature_importances_), -1), columns=['RF_Feature_Importance'])
 feature_importance_df['Variable'] = pd.Series(train_x.columns, index=feature_importance_df.index)
-feature_importance_df.to_csv('../data/rf_feature_importances.csv', index=False)                                      
+feature_importance_df.to_csv('../data/rf_feature_importances_rfImp.csv', index=False)                                      
