@@ -16,13 +16,6 @@ train = pd.read_csv('../data/trainV_ridgeImp.csv')
 val = pd.read_csv('../data/valV_ridgeImp.csv')
 test = pd.read_csv('../data/testV_ridgeImp.csv')
 
-#################################################################
-# for testing purposes
-#train = train[~train['site'].isin([train['site'].values[-1]])]
-#val = train[~train['site'].isin([train['site'].values[-1]])]
-#test = train[~train['site'].isin([train['site'].values[-1]])]
-#################################################################
-
 ### split train, val, and test into x, y, and sites
 train_x, train_y, train_sites = X_y_site_split(train, y_var_name='MonitorData', site_var_name='site')
 val_x, val_y, val_sites = X_y_site_split(val, y_var_name='MonitorData', site_var_name='site')

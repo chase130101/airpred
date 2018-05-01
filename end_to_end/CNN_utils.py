@@ -76,9 +76,12 @@ def get_monitorData_indices(sequence):
     """
     response_indicator_vec = sequence == sequence
     num_responses = torch.sum(response_indicator_vec)
-    response_indices = torch.sort(response_indicator_vec, dim=0, descending=True)[1][:num_responses]
-    ordered_response_indices = torch.sort(response_indices)[0]
-    return ordered_response_indices
+    if num_responses > 0:
+        response_indices = torch.sort(response_indicator_vec, dim=0, descending=True)[1][:num_responses]
+        ordered_response_indices = torch.sort(response_indices)[0]
+        return ordered_response_indices
+    else:
+        return torch.zeros(0)
 
 
 def r2(model, batch_size, x_stack_nonConst, x_tuple, y_tuple):
@@ -111,9 +114,10 @@ def r2(model, batch_size, x_stack_nonConst, x_tuple, y_tuple):
         y_ind_by_site = []
         for i in range(len(y_tuple_nans)):
             y_ind = get_monitorData_indices(y_tuple_nans[i])
-            y_by_site.append(y_tuple_nans[i][y_ind])
-            y_ind_by_site.append(y_ind)
-            x_by_site.append(x_tuple_batch[i][y_ind])
+            if len(y_ind.numpy()) != 0:
+                y_by_site.append(y_tuple_nans[i][y_ind])
+                y_ind_by_site.append(y_ind)
+                x_by_site.append(x_tuple_batch[i][y_ind])
         y_batch = list(Variable(torch.cat(y_by_site, dim=0)).data.numpy())
         x_batch = Variable(torch.cat(x_by_site, dim=0)).float()
         
@@ -169,11 +173,12 @@ def train_CNN(train_x_std_stack_nonConst, train_x_std_tuple, train_y_tuple, cnn,
             y_by_site = []
             x_by_site = []
             y_ind_by_site = []
-            for i in range(batch_size):
+            for i in range(len(batch)):
                 y_ind = get_monitorData_indices(train_y_tuple[batch[i]])
-                y_by_site.append(train_y_tuple[batch[i]][y_ind])
-                y_ind_by_site.append(y_ind)
-                x_by_site.append(train_x_std_tuple[batch[i]][y_ind])
+                if len(y_ind.numpy()) != 0:
+                    y_by_site.append(train_y_tuple[batch[i]][y_ind])
+                    y_ind_by_site.append(y_ind)
+                    x_by_site.append(train_x_std_tuple[batch[i]][y_ind])
             y_batch = Variable(torch.cat(y_by_site, dim=0)).float()
             x_batch = Variable(torch.cat(x_by_site, dim=0)).float()
 
