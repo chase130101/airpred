@@ -1,0 +1,415 @@
+---
+title: "CSE Capstone - HSPH EDA"
+author: "Keyan Halperin"
+date: "February 11, 2018"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, warning = F, message = F}
+library(data.table)
+library(tidyverse)
+
+setwd("C:/Users/Keyan/Google Drive/Harvard/AC 297R")
+```
+
+```{r}
+pollution_data = fread('../data/random_subset_1p.csv')
+location_census_data = fread('../data/sensor_locations_with_census.csv')
+
+#Join census data with pollution data
+full_data = left_join(pollution_data, location_census_data, by = 'site')
+
+#Remove sensors outside of the continental United States
+data = filter(full_data, Continental_indicator == 1)
+
+#Convert date to date format
+data$date = as.Date(data$date)
+
+#Extract month from date
+data$month = as.numeric(format(data$date,'%m'))
+
+#Redefine year as number of years from starting point
+#data$year = data$year - min(data$year)
+
+#Engineer other date features
+data$cumulative_month = data$year*12 + data$month 
+
+#https://ianlondon.github.io/blog/encoding-cyclical-features-24hour-time/
+data = data %>% mutate(sin_time = round(sin(2*pi*month/12), 8),
+                                 cos_time = round(cos(2*pi*month/12), 8))
+
+#Move date variables to the front of the data frame
+data = data %>% select(site, year, month, cumulative_month, sin_time, cos_time, everything())
+
+#Create latitude, longitude interaction variable 
+data$Lat_Lon_int = data$Lat * data$Lon 
+
+#create lead and site mean variables for nearby PM2.5
+data = data %>% arrange(site, date) %>% group_by(site) %>% 
+  mutate(Nearby_PM25_Site_Mean = mean(Nearby_Peak2_PM25, na.rm = T)) %>%
+  ungroup() %>% as.data.frame()
+
+```
+
+
+```{r}
+represented_zips = unique(data$Zip)
+graph_data = location_census_data
+graph_data$Represented = as.factor(ifelse(graph_data$Zip %in% represented_zips, 'Yes', 'No'))
+
+ggplot(graph_data, aes(Represented, fill = Represented)) + geom_bar() + theme_minimal() + 
+  theme(legend.position = 'none', text = element_text(size=22)) + 
+  ggtitle('Number of Zip Codes Represented by Sensors') + xlab('Represented by Sensors') +
+  scale_fill_brewer(type = 'qual', palette = 3)
+
+ggplot(graph_data, aes(x = Represented, y = Population, fill = Represented)) + 
+  stat_summary(fun.y = 'mean', geom = 'bar') + theme_minimal() + 
+  theme(legend.position = 'none', text = element_text(size=22)) + xlab('Represented by Sensors') +
+  ggtitle('Average Population by Zip Code') +
+  scale_fill_brewer(type = 'qual', palette = 3) + ylab('Average Population')
+
+ggplot(graph_data, aes(x = Represented, y = Population_Density, fill = Represented)) + 
+  stat_summary(fun.y = 'mean', geom = 'bar') + theme_minimal() + 
+  theme(legend.position = 'none', text = element_text(size=22)) + xlab('Represented by Sensors') +
+  ggtitle('Average Population Density by Zip Code') +
+  scale_fill_brewer(type = 'qual', palette = 3) + ylab('Average Population Density')
+
+
+#ggsave('num_plot.jpg', height = 12, width = 9)
+
+```
+
+
+```{r}
+#Proportion of missing values by variable
+missing.table = sapply(data, function(x) round( mean(is.na(x)), 5))
+(sorted.missing = sort(missing.table, decreasing = T)[1:25]) #78% of monitor data is missing
+
+#Graph top 10 most missing variables
+sorted.missing.df = data.frame(percent.missing = sorted.missing[1:10], variable = names(sorted.missing[1:10]), 
+                               Monitor = c('0', '1', rep('0', 8)), row.names = NULL)
+
+ggplot(sorted.missing.df, aes(x = reorder(variable, percent.missing), weight = percent.missing)) + 
+       geom_bar(aes(fill = Monitor)) + ggtitle('Top 10 Missing Variables') + 
+       ylab('Proportion Missing') + xlab('Variable') + coord_flip() + theme_minimal() +
+       theme(text = element_text(size=20), axis.text.y = element_text(size=12), legend.position = 'none') + 
+       scale_fill_manual(values = c('dodgerblue', 'red', rep('dodgerblue', 13))) 
+
+#ggsave('missing_plot.jpg', height = 10, width = 18)
+```
+
+```{r}
+#Subset contains 129,063 observations and 192 variables
+dim(data)
+
+#All 2156 sites are accounted for in this subset
+range(full_data$site)
+length(unique(full_data$site))
+
+#Each site has at least 40 observations, at most 93
+data %>% count(site) %>% summarize(min_count = min(n), avg_count = mean(n), max_count = max(n))
+
+#Sites with lowest avg pollution 
+data %>% group_by(site) %>% summarize(avg_pollution = mean(MonitorData, na.rm = T)) %>% 
+  arrange(avg_pollution) %>% slice(1:10)
+
+#Sites with highest avg pollution 
+data %>% group_by(site) %>% summarize(avg_pollution = mean(MonitorData, na.rm = T)) %>% 
+  arrange(desc(avg_pollution)) %>% slice(1:10)
+```
+
+
+```{r}
+#Monitor Data
+summary(data$MonitorData)
+
+#Distribution of Monitor Data
+ggplot(data, aes(MonitorData)) + 
+  geom_histogram(col = 'black', bins = 50) +
+    ggtitle('Pollution Distribution') + xlim(0, 100)
+```
+
+Data appears to be consistent over time
+```{r}
+#Date range
+range(data$date)
+
+#Number of observations by year
+data %>% count(year)
+
+#Proportion of missing monitor data by year
+data %>% group_by(year) %>% summarize(missing.monitor = mean(is.na(MonitorData)))
+
+#Number of observations by month
+data %>% count(month)
+
+#Proportion of missing monitor data by month
+data %>% group_by(month) %>% summarize(missing.monitor = mean(is.na(MonitorData)))
+```
+
+```{r}
+#Proportion of missing monitor data by site
+temp_table = data %>% group_by(site) %>% summarize(missing_monitor = mean(is.na(MonitorData))) 
+
+temp_table %>% arrange(missing_monitor) %>% slice(1:10)
+temp_table %>% arrange(desc(missing_monitor)) %>% slice(1:10)
+
+```
+
+
+```{r}
+#PM2.5 appears to be going down over time!
+data %>% group_by(year) %>% summarize(avg_pollution = mean(MonitorData, na.rm = T))
+
+ggplot(data, aes(x = factor(year), y = MonitorData)) + 
+  stat_summary(fun.y = 'mean', geom = 'bar', fill = 'red') +
+    ggtitle('Average Pollution over Time') + xlab('Year') + 
+  ylab('Average PM2.5 Levels') + theme_minimal() + 
+  theme(text = element_text(size=20), axis.title = element_text(size=16))
+
+#PM2.5 levels also seem to vary by month
+data %>% group_by(month) %>% summarize(avg_pollution = mean(MonitorData, na.rm = T))
+
+ggplot(data, aes(x = factor(month), y = MonitorData)) + 
+  geom_boxplot(fill = 'skyblue') + theme(legend.position = 'none') + ylim(0, 60) +
+    ggtitle('Average Pollution by Month') + xlab('Month') + 
+    ylab('Average PM2.5 Levels') + theme_minimal() + 
+    theme(text = element_text(size=20), axis.title = element_text(size=16))
+
+ggplot(data, aes(x = factor(month), y = MonitorData)) + 
+  stat_summary(fun.y = 'mean', geom = 'bar', fill = 'skyblue') +
+    ggtitle('Average Pollution by Month') + xlab('Month') + ylab('Average PM2.5 Levels') +
+  theme_minimal() + theme(text = element_text(size=20), axis.title = element_text(size=16))
+
+#Time Series of average PM2.5 levels by day over time 
+ggplot(data, aes(x = date, y = MonitorData)) + 
+  stat_summary(fun.y = 'mean', geom = 'line', size = .5, col = 'red') + ylim(0, 50) +
+    ylab('Average PM2.5 Levels') + ggtitle('Average Pollution over Time') +
+  theme_minimal() + theme(text = element_text(size=20), axis.title = element_text(size=16))
+
+#ggsave('pol_month_plot.png', height = 8, width = 12)
+
+```
+
+
+**We will now explore the relationship between the various covariates and the PM2.5 monitor data**
+```{r}
+names(data)
+#Remove rows with missing monitor data and remove non-predictor variables
+monitor.na.omit = data %>% filter(!is.na(MonitorData)) %>% select(MonitorData, everything(), -c(month, date, City:Continental_indicator ))
+
+#Look at correlation between each predictor and PM2.5 monitor data
+num.cols = ncol(monitor.na.omit)
+cors = matrix(rep(NA, 3*num.cols), nrow = num.cols)
+colnames(cors) = c('Variable', 'Correlation', 'num.complete.cases')
+
+for(i in 2:num.cols){
+  
+  monitor.na.omit2 = na.omit(monitor.na.omit[, c(1,i)])
+  correlation = cor(monitor.na.omit2$MonitorData, monitor.na.omit2[,2])
+  cors[i,2] = round(correlation, 4)
+  
+  n = nrow(monitor.na.omit2)
+  cors[i,3] = n
+  #cors[i,4] = round(n/nrow(data), 3)
+  
+}
+
+cors = as.data.frame(cors)
+cors[,1] = names(monitor.na.omit)
+
+```
+
+
+```{r}
+cors$Correlation = round(cors$Correlation, 4)
+#Variables with that are most correlated with PM2.5
+cors %>% arrange(desc(abs(Correlation))) %>% slice(1:50)
+```
+
+```{r}
+graph_data = data %>% filter(!is.na(MonitorData))
+
+ggplot(graph_data, aes(x = Nearby_Peak2_PM25, y = MonitorData)) + geom_point() +
+  ggtitle('Pollution vs. Nearby Pollution') + geom_smooth() + xlab('Nearby PM2.5') + ylab('PM2.5')
+
+ggplot(graph_data, aes(x = MAIACUS_Optical_Depth_047_Terra_Nearest4, y = MonitorData)) + 
+  geom_point() + ggtitle('Pollution vs. Aerosol Optical Depth') + ylim(0, 75) + xlim(0, 1) +
+  theme_minimal() + geom_smooth(method = 'lm') + theme(text = element_text(size=18), axis.title = element_text(size=16)) +
+  ylab('PM2.5') + xlab('Aerosol Optical Depth')
+
+```
+
+```{r}
+data$State = state.name[match(data$State, state.abb)]
+
+graph_data2 = graph_data %>% group_by(site) %>% summarize(Lon = Lon[1], Lat = Lat[1], MonitorData = mean(MonitorData), State = tolower(State[1]))
+ggplot(graph_data2, aes(Lon, MonitorData)) + geom_point() + geom_smooth() + ylim(0, 30)
+
+ggplot(graph_data2, aes(Lon, Lat, col = MonitorData)) + geom_point(size = 3)  + 
+   theme_minimal() + theme(text = element_text(size=20), axis.title = element_text(size=16)) + 
+  ggtitle('Average Pollution by Location') + xlab('Longitude') +
+  ylab('Latitude') + 
+  scale_color_gradient2('PM2.5', na.value = 'red', limits=c(0, 25), low = 'white', high = 'red')
+
+library(fiftystater)
+data("fifty_states") 
+
+# map_id creates the aesthetic mapping to the state name column in your data
+ggplot(graph_data2, aes(map_id = State)) + 
+  # map points to the fifty_states shape data
+  geom_map(aes(fill = MonitorData), map = fifty_states) + 
+  expand_limits(x = fifty_states$long, y = fifty_states$lat) +
+  coord_map() +
+  scale_x_continuous(breaks = NULL) + 
+  scale_y_continuous(breaks = NULL) +
+  scale_fill_gradient2(limits=c(0, 15), low = 'white', high = 'red',  name="PM2.5") +
+  labs(x = "", y = "") +
+  theme(text = element_text(size=18), legend.title = element_text(size=14) , 
+        panel.background = element_blank()) +
+  ggtitle('Average Pollution by State')
+
+```
+
+
+```{r}
+names(graph_data)
+graph_data2 = graph_data %>% group_by(site) %>% 
+             summarize(pollution = mean(MonitorData),
+             white = mean(White_p), income = mean(Median_household_income), 
+             pop = mean(Population), bach = mean(Bachelors_Degree_p),
+             pov = mean(Family_Poverty_p))
+   
+ 
+
+ggplot(graph_data2, aes(income, pollution)) + geom_point() + geom_smooth(method = 'lm',level = .99) + 
+  theme_minimal() + theme(text = element_text(size=20), axis.title = element_text(size=16)) + 
+  ggtitle('Average Pollution by Longitude') + ylab('Average PM2.5 Sensor Reading') +
+  xlab('Longitude')
+
+ggplot(graph_data2, aes(white, pollution)) + geom_point() + geom_smooth(method = 'lm',level = .99) + 
+  ylim(0,40) + theme_minimal() + theme(text = element_text(size=20), axis.title = element_text(size=16)) + 
+  ggtitle('Average Pollution by Race') + ylab('Average PM2.5 Sensor Reading') +
+  xlab('Proportion of White Individuals in Zip Code')
+
+ggplot(filter(graph_data2, income > 0), aes(income, pollution)) + geom_point() + 
+  geom_smooth(method = 'gam', level = .99) + 
+  ylim(0,50) + theme_minimal() + theme(text = element_text(size=20), axis.title = element_text(size=16)) + 
+  ggtitle('Average Pollution by Median Income') + ylab('Average PM2.5 Sensor Reading') +
+  xlab('Median Household Income of Zip Code') + scale_x_continuous(breaks=seq(0,150000,by=25000), limits = c(0, 150000))
+
+ggplot(graph_data2, aes(pop, pollution)) + geom_point() + 
+  geom_smooth(method = 'lm', level = .99) + 
+   theme_minimal() + theme(text = element_text(size=20), axis.title = element_text(size=16)) + 
+  ggtitle('Average Pollution by Population') + ylab('Average PM2.5 Sensor Reading') +
+  xlab('Total Population of Zip Code')+ ylim(0,50)
+
+ggplot(graph_data2, aes(bach, pollution)) + geom_point() + 
+  geom_smooth(method = 'lm', level = .99) + 
+   theme_minimal() + theme(text = element_text(size=20), axis.title = element_text(size=16)) + 
+  ggtitle('Average Pollution by Education') + ylab('Average PM2.5 Sensor Reading') +
+  xlab('Proportion of Individuals with Bachelors Degree')+ ylim(0,50) + xlim(0, .6)
+
+ggplot(filter(graph_data2, pov > 0), aes(pov, pollution)) + geom_point() + 
+  geom_smooth(method = 'lm', level = .99) + 
+   theme_minimal() + theme(text = element_text(size=20), axis.title = element_text(size=16)) + 
+  ggtitle('Average Pollution by Poverty') + ylab('Average PM2.5 Sensor Reading') +
+  xlab('Proportion of Individuals in Poverty')+ ylim(0,50)
+
+#ggsave('white_plot.png', height = 8, width = 14)
+
+```
+
+```{r}
+
+graph.data = data.frame(Race = c(rep('White', n), rep('Black', n)), 
+                                 MonitorData = c(summary.data$w.m, summary.data$b.m),
+                                 Percentage.of.Race = c(summary.data$w, summary.data$b))
+
+ggplot(graph.data, aes(x = Percentage.of.Race, y = MonitorData, col = Race)) + 
+  geom_point(alpha = 1) + ylim(0, 25) + scale_color_manual(values = c('black', 'lightskyblue')) + theme_minimal() +
+  ggtitle('Average Pollution by Race') +  theme(text = element_text(size=20), axis.title = element_text(size=16)) + 
+  ylab('Average PM2.5 Sensor Reading') +
+  xlab('Proportion of Black Individuals')
+
+```
+
+```{r}
+pred.data = read.csv('test_true_pred_rfImp_best_rf.csv')
+str(pred.data)
+
+ggplot(pred.data, aes(actual, pred)) + geom_point()  + geom_abline(size=1.5, col = 'red') +
+   theme_minimal() + theme(text = element_text(size=20), axis.title = element_text(size=16)) + 
+  ggtitle('Actual vs. Predicted PM2.5 Sensor Readings') + ylab('Predicted Value') +
+  xlab('Actual Value') + xlim(0, 50) + ylim(0, 50)
+
+ggsave('act_pred.jpg', height = 8, width = 12)
+```
+
+```{r}
+data = data %>% select(-c(White:Age_70_plus, Households, Family_Households))
+cor_data = data %>% select(-c(site, date, City:Continental_indicator))
+names(cor_data)
+#cor(cor_data, use = 'pairwise.complete.obs')
+
+require(ggcorrplot)
+elev = cor_data %>% select(USElevation_dsc10000:USElevation_bln10000)
+elev_cor = cor(elev, use = 'pairwise.complete.obs')
+ggcorrplot(elev_cor, type = 'lower', outline.col = 'white')
+
+nearby = cor_data %>% select(Nearby_Peak2_PM25:Nearby_Peak2Lag3_MinTemperature)
+nearby_cor = cor(nearby, use = 'pairwise.complete.obs')
+ggcorrplot(nearby_cor, type = 'lower', outline.col = 'white')
+```
+
+```{r}
+age = cor_data %>% select(c(MonitorData, Age_0to9_p:Age_over70_p))
+
+cor(age[,-1], use = 'pairwise.complete.obs')
+
+age_fit = lm(MonitorData ~ ., data = age)
+car::vif(age_fit)
+
+```
+
+
+```{r}
+cor_data = cor_data %>% filter(!is.na(MonitorData))
+num_cols = ncol(cor_data)
+pcors = matrix(rep(NA, 4*num_cols), nrow = num_cols)
+colnames(pcors) = c('Variable', 'Partial_Correlation', 'P-Value', 'num_complete_cases')
+
+for(i in (1:num_cols)[-c(6, 94, 80, 114)]){
+  #if(i == 1){next}
+  
+  data2 = na.omit(cor_data[, c(i, 6, 94)])
+  cor_test = ppcor::pcor.test(x=data2$MonitorData, y=data2[,1],
+                              z=data2$Nearby_Peak2_PM25)
+
+  pcors[i,1] = names(data2)[1] 
+  pcors[i,2] = round(cor_test$estimate, 5)
+  pcors[i,3] = round(cor_test$p.value, 5)
+  
+  n = nrow(data2)
+  pcors[i,4] = n
+  
+}
+
+pcors = data.frame(pcors, stringsAsFactors = F)
+pcors$Partial_Correlation = as.numeric(pcors$Partial_Correlation)
+pcors$P.Value = as.numeric(pcors$P.Value)
+
+
+#Variables with that are most correlated with PM2.5
+(pcor.table = pcors %>% arrange(desc(abs(Partial_Correlation))) %>% slice(1:20))
+
+(pcor.table = pcors %>% arrange(abs(Partial_Correlation)) %>% slice(1:20))
+
+```
+
