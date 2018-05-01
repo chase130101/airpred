@@ -19,7 +19,7 @@ xgboost = xgb.XGBRegressor(random_state=1, n_jobs=-1)
 #Information on gradient boosting parameter tuning
 #https://machinelearningmastery.com/configure-gradient-boosting-algorithm/
 # hyper-parameters to test in cross-validation
-parameter_grid_xgboost = {'learning_rate': [0.001, 0.01, 0.05, 0.1], 'max_depth': [4, 6, 8, 10], 'n_estimators': [100, 250, 500, 750, 1000]}
+parameter_grid_xgboost = {'learning_rate': [0.01, 0.05, 0.1], 'max_depth': [5], 'n_estimators': [500, 750, 1000]}
 
 # run cross-validation
 cv_r2, best_hyperparams = cross_validation(data=train, model=xgboost, hyperparam_dict=parameter_grid_xgboost, num_folds=4, y_var_name='MonitorData', site_var_name='site')
