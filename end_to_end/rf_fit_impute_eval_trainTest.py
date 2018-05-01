@@ -40,7 +40,7 @@ test_r2_scores_df.loc[max(test_r2_scores_df.index)+1, :] = [np.average(test_r2_s
                                                                    weights=test_r2_scores_df.loc[:, 'Test_num_missing'].values,
                                                                    axis=0), np.mean(test_r2_scores_df.loc[:, 'Test_num_missing'].values)]
 
-### put imputed data matrices back into pandas dataframes with column names
+### convert imputed data matrices back into pandas dataframes with column names
 cols = ['site', 'MonitorData'] + list(train1_x.columns)
 train1_imp_df = pd.DataFrame(np.concatenate([train1_sites.values.reshape(len(train1_sites), -1),
                                               train1_y.values.reshape(len(train1_y), -1),
