@@ -189,7 +189,7 @@ def train_CNN(train_x_std_stack_nonConst, train_x_std_tuple, train_y_tuple, cnn,
             # accumulate loss over epoch
             epoch_loss += loss_batch.data[0]
 
-        if epoch % 10 == 0:
+        if epoch+1 % 25 == 0:
             print('Epoch loss after epoch ' + str(epoch+1) + ': ' + str(epoch_loss))
             print('Train R^2 after epoch ' + str(epoch+1) + ': ' + str(r2(cnn, batch_size, train_x_std_stack_nonConst, train_x_std_tuple, train_y_tuple)))
     
