@@ -61,7 +61,7 @@ class CNN2(torch.nn.Module):
         self.norm_conv = torch.nn.BatchNorm1d(num_features=hidden_size_conv)
         self.relu_conv = torch.nn.ReLU()
         
-        # linear layer for all input variables; normalize output before ReLU; dropout after ReLU
+        # 2 fully connected linear layers with first layer taking all input variables; normalize output before ReLU activations; dropout after ReLU activations
         self.linear_full = torch.nn.Linear(in_features=input_size_full, out_features=hidden_size_full, bias=True)
         self.norm_full = torch.nn.BatchNorm1d(num_features=hidden_size_full)
         self.relu_full = torch.nn.ReLU()
@@ -70,9 +70,8 @@ class CNN2(torch.nn.Module):
         self.relu2_full = torch.nn.ReLU()
         self.dropout2_full = torch.nn.Dropout(p=dropout2_full)
         
-        # linear layer for combination of outputs from convolution layer and initial linear layer
-        # normalize output before ReLU; dropout after ReLU
-        # linear layer for model output
+        # linear layer for combination of outputs from convolution layer and fully connected layers
+        # produces model output
         self.linear_combo = torch.nn.Linear(in_features=hidden_size_conv+hidden_size2_full, out_features=1, bias=True)
         
     def forward(self, input_conv, input_full, y_ind_by_site):
@@ -94,7 +93,7 @@ class CNN2(torch.nn.Module):
             hidden_conv_w_response.append(torch.transpose(hidden_conv[i][:, y_ind_by_site[i]], 0, 1)) 
         hidden_conv_w_response = torch.cat(hidden_conv_w_response, dim=0)
         
-        # concatenate convolution outputs for which there is a response value with outputs from initial linear layer
+        # concatenate convolution outputs for which there is a response value with outputs from fully connected layers
         hidden_conv_w_response__hidden_full = torch.cat([hidden_conv_w_response, hidden_full], dim=1)
         output = self.linear_combo(hidden_conv_w_response__hidden_full)
 
