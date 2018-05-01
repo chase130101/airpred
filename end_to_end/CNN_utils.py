@@ -76,9 +76,12 @@ def get_monitorData_indices(sequence):
     """
     response_indicator_vec = sequence == sequence
     num_responses = torch.sum(response_indicator_vec)
-    response_indices = torch.sort(response_indicator_vec, dim=0, descending=True)[1][:num_responses]
-    ordered_response_indices = torch.sort(response_indices)[0]
-    return ordered_response_indices
+    if num_responses > 0:
+        response_indices = torch.sort(response_indicator_vec, dim=0, descending=True)[1][:num_responses]
+        ordered_response_indices = torch.sort(response_indices)[0]
+        return ordered_response_indices
+    else:
+        return torch.zeros(0)
 
 
 def r2(model, batch_size, x_stack_nonConst, x_tuple, y_tuple):
@@ -111,9 +114,10 @@ def r2(model, batch_size, x_stack_nonConst, x_tuple, y_tuple):
         y_ind_by_site = []
         for i in range(len(y_tuple_nans)):
             y_ind = get_monitorData_indices(y_tuple_nans[i])
-            y_by_site.append(y_tuple_nans[i][y_ind])
-            y_ind_by_site.append(y_ind)
-            x_by_site.append(x_tuple_batch[i][y_ind])
+            if len(y_ind.numpy()) != 0:
+                y_by_site.append(y_tuple_nans[i][y_ind])
+                y_ind_by_site.append(y_ind)
+                x_by_site.append(x_tuple_batch[i][y_ind])
         y_batch = list(Variable(torch.cat(y_by_site, dim=0)).data.numpy())
         x_batch = Variable(torch.cat(x_by_site, dim=0)).float()
         
@@ -146,3 +150,52 @@ def get_nonConst_vars(data, site_var_name='site', y_var_name='MonitorData', cuto
             nonConst_colNames.append(data_site_x.columns[i])
     
     return nonConst_colNames
+
+
+def train_CNN(train_x_std_stack_nonConst, train_x_std_tuple, train_y_tuple, cnn, optimizer, loss, num_epochs, batch_size):
+    
+    # get number of batches
+    if train_x_std_stack_nonConst.size()[0] % batch_size != 0:
+        num_batches = int(np.floor(train_x_std_stack_nonConst.size()[0]/batch_size) + 1)
+    else:
+        num_batches = int(train_x_std_stack_nonConst.size()[0]/batch_size)
+
+    for epoch in range(num_epochs):
+        # get set of shuffled batches for epoch
+        batches = np.random.choice(np.arange(train_x_std_stack_nonConst.size()[0]), size=(num_batches-1, batch_size), replace=False)
+        epoch_loss = 0
+
+        for batch in batches:
+            # get x and y for this batch
+            x_stack_batch_nonConst = train_x_std_stack_nonConst[torch.from_numpy(batch).long()]
+
+            # get indices for monitor data and actual monitor data
+            y_by_site = []
+            x_by_site = []
+            y_ind_by_site = []
+            for i in range(len(batch)):
+                y_ind = get_monitorData_indices(train_y_tuple[batch[i]])
+                if len(y_ind.numpy()) != 0:
+                    y_by_site.append(train_y_tuple[batch[i]][y_ind])
+                    y_ind_by_site.append(y_ind)
+                    x_by_site.append(train_x_std_tuple[batch[i]][y_ind])
+            y_batch = Variable(torch.cat(y_by_site, dim=0)).float()
+            x_batch = Variable(torch.cat(x_by_site, dim=0)).float()
+
+            # get model output
+            pred_batch = cnn(x_stack_batch_nonConst, x_batch, y_ind_by_site)
+
+            # zero gradient, compute loss, backprop, and update parameters
+            optimizer.zero_grad()
+            loss_batch = loss(pred_batch, y_batch)
+            loss_batch.backward()
+            optimizer.step()
+
+            # accumulate loss over epoch
+            epoch_loss += loss_batch.data[0]
+
+        if epoch+1 % 25 == 0:
+            print('Epoch loss after epoch ' + str(epoch+1) + ': ' + str(epoch_loss))
+            print('Train R^2 after epoch ' + str(epoch+1) + ': ' + str(r2(cnn, batch_size, train_x_std_stack_nonConst, train_x_std_tuple, train_y_tuple)))
+    
+    return None

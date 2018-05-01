@@ -5,10 +5,10 @@ import sklearn.metrics
 import pickle
 from data_split_tune_utils import X_y_site_split
 
-train = pd.read_csv('../data/train_ridgeImp.csv')
-test = pd.read_csv('../data/test_ridgeImp.csv')
-#train = pd.read_csv('../data/train_rfImp.csv')
-#test = pd.read_csv('../data/test_rfImp.csv')
+#train = pd.read_csv('../data/train_ridgeImp.csv')
+#test = pd.read_csv('../data/test_ridgeImp.csv')
+train = pd.read_csv('../data/train_rfImp.csv')
+test = pd.read_csv('../data/test_rfImp.csv')
 
 # drop rows with no monitor data response value
 train = train.dropna(axis=0)
@@ -38,5 +38,5 @@ print('Test R^2: ' + str(test_r2_ridge))
 test['MonitorData_pred'] = pd.Series(test_pred_ridge, index=test.index)
 
 # save test dataframe with predictions and final trained model
-test.to_csv('../data/test_ridgePred.csv', index=False)
-pickle.dump(ridge, open('ridge_final.pkl', 'wb'))
+test.to_csv('../data/test_ridgePred_rfImp.csv', index=False)
+pickle.dump(ridge, open('ridge_final_rfImp.pkl', 'wb'))
