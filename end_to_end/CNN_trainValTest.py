@@ -141,6 +141,7 @@ for epoch in range(num_epochs):
         pred_batch = cnn(x_stack_batch_nonConst, x_batch, y_ind_by_site)
         
         # compute loss, backprop, and update parameters
+        optimizer.zero_grad()
         loss_batch = mse_loss(pred_batch, y_batch)
         loss_batch.backward()
         optimizer.step()
