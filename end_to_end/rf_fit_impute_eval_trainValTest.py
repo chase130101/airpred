@@ -80,7 +80,7 @@ train_imp_df = train_imp_df.reset_index().sort_values(['site', 'index'])
 train_imp_df.drop('index', axis=1, inplace=True)
 train_imp_df.reset_index(inplace=True, drop=True)
 
-# save evaluations and imputated datasets
+# save evaluations and imputed datasets
 r2_scores_df.to_csv('../data/r2_scoresV_rfImp.csv', index=False)
 train_imp_df.to_csv('../data/trainV_rfImp.csv', index=False)
 val_imp_df.to_csv('../data/valV_rfImp.csv', index=False)

@@ -42,7 +42,7 @@ test_imp_df = pd.DataFrame(np.concatenate([test_sites.values.reshape(len(test_si
 var_df = pd.DataFrame(np.array(cols[2:]+['Weighted_Mean_R2']).reshape(len(cols)-2+1, -1), columns=['Variable'])
 r2_scores_df = pd.concat([var_df, train_r2_scores_df, test_r2_scores_df], axis=1)
 
-# save evaluations and imputated datasets
+# save evaluations and imputed datasets
 r2_scores_df.to_csv('../data/r2_scores_ridgeImp.csv', index=False)
 train_imp_df.to_csv('../data/train_ridgeImp.csv', index=False)
 test_imp_df.to_csv('../data/test_ridgeImp.csv', index=False)
