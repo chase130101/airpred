@@ -9,10 +9,58 @@ from predictiveImputer_mod import PredictiveImputer
 
 parser = argparse.ArgumentParser()
 
+
 # add optional validation set argument
 parser.add_argument("--val", 
     help="Train using a validation set in addition to train and test sets",
     action="store_true" )
+
+
+# add optional training data split proportion argument
+parser.add_argument("--impute_split", 
+    help="Specify what proportion of the training set to fit the imputer on. " + \
+         "Must lie between 0 and 1. Default value is 0.23.",
+    type = float,
+    default = 0.23)
+
+
+# add optional initial imputation stragegy argument
+parser.add_argument("--initial_strategy", 
+    help="Determines how to impute columns prior to first iteration of method. Default is mean imputation.",
+    choices = ["mean", "median"],
+    default = "mean")
+
+
+# add optional backup imputation stragegy argument
+parser.add_argument("--backup_strategy", 
+    help="Determines how to impute columns should ridge imputer perform poorly. Default is mean imputation.",
+    choices = ["mean", "median"],
+    default = "mean")
+
+
+# add optional maximum iteration argument for Predictive Imputer
+parser.add_argument("--max_iter", 
+    help="Determines the maximum number of iterations Predictive Imputer can run for, " + \
+         "if the stopping criterion is not reached. Default is 10.",
+    type = float,
+    default = 10)
+
+
+# add optional maximum features argument for Predictive Imputer
+parser.add_argument("-- max_features", 
+    help="Determines the maximum number of iterations Predictive Imputer can run for, " + \
+         "if the stopping criterion is not reached. Default is 15.",
+    type = float,
+    default = 15)
+
+
+# add optional number of estimators argument random forest in Predictive Imputer
+parser.add_argument("--n_estimators", 
+    help="Determines the number of estimators to use in Predictive Imputer's random forest. " + \
+     "Default is 25.",
+    type = float,
+    default = 25)
+
 
 args = parser.parse_args()
 
@@ -20,6 +68,7 @@ config = configparser.RawConfigParser()
 config.read('config/py_config.ini')
 
 train, val, test = None, None, None
+
 
 if args.val:
     train = pd.read_csv(config["data"]["trainV"])
@@ -32,16 +81,16 @@ else:
 
 np.random.seed(1)
 
-train1, train2 = train_test_split(train, train_prop = 0.23, site_var_name = 'site')
+train1, train2 = train_test_split(train, train_prop = args.impute_split, site_var_name = 'site')
 
 train1_x, train1_y, train1_sites = X_y_site_split(train1, y_var_name='MonitorData', site_var_name='site')
 train2_x, train2_y, train2_sites = X_y_site_split(train2, y_var_name='MonitorData', site_var_name='site')
 test_x, test_y, test_sites = X_y_site_split(test, y_var_name='MonitorData', site_var_name='site')
 
-rf_imputer = PredictiveImputer(max_iter=10, initial_strategy='mean', f_model='RandomForest')
-rf_imputer.fit(train1_x, max_features=15, n_estimators=25, n_jobs=-1, verbose=0, random_state=1)
+rf_imputer = PredictiveImputer(max_iter=args.max_iter, initial_strategy=args.initial_strategy, f_model='RandomForest')
+rf_imputer.fit(train1_x, max_features=args.max_features, n_estimators=args.n_estimators, n_jobs=-1, verbose=0, random_state=1)
 
-train1_x_imp, train1_r2_scores_df = rf_imputer.transform(train1_x, evaluate = True, backup_impute_strategy = 'mean')
+train1_x_imp, train1_r2_scores_df = rf_imputer.transform(train1_x, evaluate = True, backup_impute_strategy = args.backup_strategy)
 train1_r2_scores_df.columns = ['Train1_R2', 'Train1_num_missing']
 train1_r2_scores_df.loc[max(train1_r2_scores_df.index)+1, :] = [np.average(train1_r2_scores_df.loc[:, 'Train1_R2'].values,\
                                                                    weights = train1_r2_scores_df.loc[:, 'Train1_num_missing'].values,\
@@ -82,10 +131,9 @@ train_imp_df = pd.concat([train1_imp_df, train2_imp_df])
 train_imp_df = train_imp_df.reset_index().sort_values(['site', 'index'])
 train_imp_df.drop('index', axis=1, inplace=True)
 train_imp_df.reset_index(inplace=True, drop=True)
-train_imp_df.to_csv('../data/trainV_rfImp.csv', index = False)
-test_imp_df.to_csv('../data/testV_rfImp.csv', index = False)
+train_imp_df.to_csv(config["RF_Imputation"]["train"], index = False)
+test_imp_df.to_csv(config["RF_Imputation"]["test"], index = False)
 #pickle.dump(rf_imputer, open('rfV_imputer.pkl', 'wb'))
-
 
 
 if args.val:
@@ -102,15 +150,15 @@ if args.val:
                                                   val_x_imp], axis=1),\
                                                   columns = cols)
 
-    val_imp_df.to_csv('../data/valV_rfImp.csv', index = False)
+    val_imp_df.to_csv(config["RF_Imputation"]["val"], index = False)
 
     r2_scores_df = pd.concat([var_df, train1_r2_scores_df, train2_r2_scores_df, val_r2_scores_df, test_r2_scores_df], axis=1)
 
-    r2_scores_df.to_csv('../data/r2_scoresV_rfImp.csv', index = False)
+    r2_scores_df.to_csv(config["RF_Imputation"]["r2_scores"], index = False)
 
 
 else:
     r2_scores_df = pd.concat([var_df, train1_r2_scores_df, train2_r2_scores_df, test_r2_scores_df], axis=1)
-    r2_scores_df.to_csv('../data/r2_scoresV_rfImp.csv', index = False)
+    r2_scores_df.to_csv(config["RF_Imputation"]["r2_scores"], index = False)
 
 

@@ -12,6 +12,13 @@ parser.add_argument("--val",
     help="Train using a validation set in addition to train and test sets",
     action="store_true" )
 
+# add optional backup imputation stragegy argument
+parser.add_argument("--backup_strategy", 
+    help="Determines how to impute columns should ridge imputer perform poorly. Default is mean imputation.",
+    choices = ["mean", "median"],
+    default = "mean")
+
+
 args = parser.parse_args()
 
 config = configparser.RawConfigParser()
@@ -35,12 +42,15 @@ ridge_imputer = pickle.load(open(config["Ridge_Imputation"]["model"], 'rb'))
 train_x, train_y, train_sites = X_y_site_split(train, y_var_name='MonitorData', site_var_name='site')
 test_x, test_y, test_sites = X_y_site_split(test, y_var_name='MonitorData', site_var_name='site')
 
-train_x_imp, train_r2_scores_df = ridge_imputer.transform(train_x, evaluate = True, backup_impute_strategy = 'mean')
+train_x_imp, train_r2_scores_df = ridge_imputer.transform(train_x, evaluate = True, backup_impute_strategy = args.backup_strategy)
+
 train_r2_scores_df.columns = ['Train_R2', 'Train_num_missing']
 train_r2_scores_df.loc[max(train_r2_scores_df.index)+1, :] = [np.average(train_r2_scores_df.loc[:, 'Train_R2'].values,\
                                                                    weights = train_r2_scores_df.loc[:, 'Train_num_missing'].values,\
                                                                    axis=0), np.mean(train_r2_scores_df.loc[:, 'Train_num_missing'].values)]
-test_x_imp, test_r2_scores_df = ridge_imputer.transform(test_x, evaluate = True, backup_impute_strategy = 'mean')
+
+test_x_imp, test_r2_scores_df = ridge_imputer.transform(test_x, evaluate = True, backup_impute_strategy = args.backup_strategy)
+
 test_r2_scores_df.columns = ['Test_R2', 'Test_num_missing']
 test_r2_scores_df.loc[max(test_r2_scores_df.index)+1, :] = [np.average(test_r2_scores_df.loc[:, 'Test_R2'].values,\
                                                                    weights = test_r2_scores_df.loc[:, 'Test_num_missing'].values,\
