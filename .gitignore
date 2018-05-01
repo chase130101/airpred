@@ -30,4 +30,6 @@ data/trainV.csv
 data/valV.csv
 data/testV.csv
 data/*Pred.csv
-
+data/rf_feature_importances_rfImp.csv
+data/test_rfPred_rfImp.csv
+data/test_ridgePred_rfImp.csv
