@@ -2,12 +2,10 @@
 require(data.table)
 require(dplyr)
 
-# Read config file
-source("config/data_setup_config.R")
-
 #Read data
-pollution_data = readRDS(POLLUTION_DATA_PATH)
-location_census_data = fread(CENSUS_DATA_PATH)
+#pollution_data = fread('../data/assembled_data.csv')
+pollution_data = readRDS('../data/assembled_data.rds')
+location_census_data = fread('../data/sensor_locations_with_census.csv')
 
 #Join census data with pollution data
 full_data = left_join(pollution_data, location_census_data, by = 'site')
@@ -89,6 +87,6 @@ full_data = full_data %>% arrange(site, date) %>% group_by(site) %>%
 full_data = select(full_data, -date)
 
 #Write to csv 
-fwrite(full_data, FULL_SAVE_RESULT_PATH)
+fwrite(full_data, '../data/data_to_impute.csv')
 
 print('Done')
