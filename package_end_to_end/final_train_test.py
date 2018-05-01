@@ -101,7 +101,7 @@ elif args.model == "rf":
 
     feature_importance_df = pd.DataFrame(rf.feature_importances_.reshape(len(rf.feature_importances_), -1), columns=['RF_Feature_Importance'])
     feature_importance_df['Variable'] = pd.Series(train_x.columns, index=feature_importance_df.index)
-    feature_importance_df.to_csv(config["Regression"]['rf_ft'], index=False)                                      
+    feature_importance_df.to_csv(config["Regression"]['rf_fti'], index=False)                                      
 
 
 elif args.model == "xgb":
@@ -122,7 +122,7 @@ elif args.model == "xgb":
 
     feature_importance_df = pd.DataFrame(xgboost.feature_importances_.reshape(len(xgboost.feature_importances_), -1), columns=['XGBoost_Feature_Importance'])
     feature_importance_df['Variable'] = pd.Series(train_x.columns, index=feature_importance_df.index)
-    feature_importance_df.to_csv(config["Regression"]['xgb_ft'], index=False)  
+    feature_importance_df.to_csv(config["Regression"]['xgb_fti'], index=False)  
 
     #Variable importance plot
     #xgb.plot_importance(model, max_num_features=20)
