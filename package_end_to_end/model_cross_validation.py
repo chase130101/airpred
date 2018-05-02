@@ -54,36 +54,59 @@ elif args.dataset == "rfImp":
 if train == None: # failsafe
     print("Invalid dataset!")
     sys.exit()
+    
 
+# set seed for reproducibility
+np.random.seed(1)
+
+# drop rows with no monitor data response value
 train = train.dropna(axis=0)
 
 print("Training model \"{}\" on dataset \"{}\"...)".format(args.model, args.dataset))
 
 if args.model == "ridge":
+    # instantiate ridge
     ridge = sklearn.linear_model.Ridge(random_state=1, normalize=True, fit_intercept=True)
+    
+    # ridge hyper-parameters to test in cross-validation
     parameter_grid_ridge = {"alpha" : [0.1, 0.01, 0.001, 0.0001, 0.00001]}
+    
+    # run cross-validation
     cv_r2, best_hyperparams = cross_validation(data=train, model=ridge, hyperparam_dict=parameter_grid_ridge, num_folds=4, y_var_name="MonitorData", site_var_name="site")
     print("Cross-validation R^2: " + str(cv_r2))
     print("Best hyper-parameters: " + str(best_hyperparams))
+    
+    # save dictionary with best ridge hyper-parameter combination
     pickle.dump(best_hyperparams, open(config["Reg_Best_Hyperparams"]["ridge"], "wb"))
 
 elif args.model == "rf":
+    # instantiate random forest
     rf = sklearn.ensemble.RandomForestRegressor(n_estimators=200, random_state=1, n_jobs=-1)
+    
+    # random forest hyper-parameters to test in cross-validation
     parameter_grid_rf = {"max_features" : [10, 15, 20, 25]}
+    
+    # run cross-validation
     cv_r2, best_hyperparams = cross_validation(data=train, model=rf, hyperparam_dict=parameter_grid_rf, num_folds=4, y_var_name="MonitorData", site_var_name="site")
     print("Cross-validation R^2: " + str(cv_r2))
     print("Best hyper-parameters: " + str(best_hyperparams))
+    
+    # save dictionary with best random forest hyper-parameter combination
     pickle.dump(best_hyperparams, open(config["Reg_Best_Hyperparams"]["rf"], "wb"))
 
 elif args.model == "xgb":
+    # instantiate xgboost
     xgboost = xgb.XGBRegressor(random_state=1, n_jobs=-1)
 
     #Information on gradient boosting parameter tuning
-    #https://machinelearningmastery.com/configure-gradient-boosting-algorithm/
+    #https://machinelearningmastery.com/configure-gradient-boosting-algorithm
+    # xgboost hyper-parameters to test in cross-validation
     parameter_grid_xgboost = {"learning_rate": [0.001, 0.01, 0.05, 0.1], "max_depth": [4, 6, 8, 10], "n_estimators": [100, 250, 500, 750, 1000]}
 
+    # run cross-validation
     cv_r2, best_hyperparams = cross_validation(data=train, model=xgboost, hyperparam_dict=parameter_grid_xgboost, num_folds=4, y_var_name="MonitorData", site_var_name="site")
     print("Cross-validation R^2: " + str(cv_r2))
     print("Best hyper-parameters: " + str(best_hyperparams))
+    
+    # save dictionary with best xgboost hyper-parameter combination
     pickle.dump(best_hyperparams, open(config["Reg_Best_Hyperparams"]["xgb"], "wb"))
-

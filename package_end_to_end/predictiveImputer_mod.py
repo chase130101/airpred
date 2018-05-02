@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import copy
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestRegressor
