@@ -14,11 +14,6 @@ torch.manual_seed(1)
 ### read in train, val, and test
 train = pd.read_csv('../data/trainV_ridgeImp.csv')
 val = pd.read_csv('../data/valV_ridgeImp.csv')
-test = pd.read_csv('../data/testV_ridgeImp.csv')
-
-print(len(train))
-print(len(val))
-print(len(test))
 
 ### delete sites from datasets where all monitor outputs are NaN
 train_sites_all_nan_df = pd.DataFrame(np.isnan(train.groupby('site').sum()['MonitorData']))
@@ -29,36 +24,24 @@ val_sites_all_nan_df = pd.DataFrame(np.isnan(val.groupby('site').sum()['MonitorD
 val_sites_to_delete = list(val_sites_all_nan_df[val_sites_all_nan_df['MonitorData'] == True].index)
 val = val[~val['site'].isin(val_sites_to_delete)]
 
-test_sites_all_nan_df = pd.DataFrame(np.isnan(test.groupby('site').sum()['MonitorData']))
-test_sites_to_delete = list(test_sites_all_nan_df[test_sites_all_nan_df['MonitorData'] == True].index)
-test = test[~test['site'].isin(test_sites_to_delete)]
-
-print(len(train))
-print(len(val))
-print(len(test))
-
 ### split train, val, and test into x, y, and sites
 train_x, train_y, train_sites = X_y_site_split(train, y_var_name='MonitorData', site_var_name='site')
 val_x, val_y, val_sites = X_y_site_split(val, y_var_name='MonitorData', site_var_name='site')
-test_x, test_y, test_sites = X_y_site_split(test, y_var_name='MonitorData', site_var_name='site')
 
 ### get dataframes with non-constant features only
 nonConst_vars = get_nonConst_vars(train, site_var_name='site', y_var_name='MonitorData', cutoff=1000)
 train_x_nonConst = train_x.loc[:, nonConst_vars]
 val_x_nonConst = val_x.loc[:, nonConst_vars]
-test_x_nonConst = test_x.loc[:, nonConst_vars]
 
 ### standardize all features
 standardizer_all = sklearn.preprocessing.StandardScaler(with_mean = True, with_std = True)
 train_x_std_all = standardizer_all.fit_transform(train_x)
 val_x_std_all = standardizer_all.transform(val_x)
-test_x_std_all = standardizer_all.transform(test_x)
 
 ### standardize non-constant features
 standardizer_nonConst = sklearn.preprocessing.StandardScaler(with_mean = True, with_std = True)
 train_x_std_nonConst = standardizer_nonConst.fit_transform(train_x_nonConst)
 val_x_std_nonConst = standardizer_nonConst.transform(val_x_nonConst)
-test_x_std_nonConst = standardizer_nonConst.transform(test_x_nonConst)
 
 
 
@@ -89,45 +72,24 @@ val_x_std_stack_nonConst = pad_stack_splits(val_x_std_tuple_nonConst, np.array(v
 val_x_std_stack_nonConst = Variable(torch.transpose(val_x_std_stack_nonConst, 1, 2))
 
 
-### get split sizes for TEST data (splitting by site)
-test_split_sizes = split_sizes_site(test_sites.values)
 
-### get tuples by site
-test_x_std_tuple_nonConst = split_data(torch.from_numpy(test_x_std_nonConst).float(), test_split_sizes, dim = 0)
-test_x_std_tuple = split_data(torch.from_numpy(test_x_std_all).float(), test_split_sizes, dim = 0)
-test_y_tuple = split_data(torch.from_numpy(test_y.values), test_split_sizes, dim = 0)
-
-### get site sequences stacked into matrix to go through CNN
-test_x_std_stack_nonConst = pad_stack_splits(test_x_std_tuple_nonConst, np.array(test_split_sizes), 'x')
-test_x_std_stack_nonConst = Variable(torch.transpose(test_x_std_stack_nonConst, 1, 2))
-
-
-
-num_epochs = 5
+num_epochs = 51
 batch_size = 128
 input_size_conv = train_x_std_nonConst.shape[1]
 input_size_full = train_x_std_all.shape[1]
+print('Total number of variables: ' + str(input_size_full))
+print('Total number of non-constant variables: ' + str(input_size_conv))
 
 # CNN and optimizer hyper-parameters to test
-#hidden_size_conv_list = [25, 50]
-#kernel_size_list = [3, 5]
-#padding_list = [1, 2]
-#hidden_size_full_list = [50, 100]
-#dropout_full_list = [0.1, 0.4]
-#hidden_size_combo_list = [50, 100]
-#dropout_combo_list = [0.1, 0.4]
-#lr_list = [0.1, 0.01]
-#weight_decay_list = [0.0001, 0.00001]
-
-hidden_size_conv_list = [25]
-kernel_size_list = [3]
-padding_list = [1]
-hidden_size_full_list = [50]
-dropout_full_list = [0.1]
-hidden_size_combo_list = [50]
-dropout_combo_list = [0.1]
-lr_list = [0.1]
-weight_decay_list = [0.0001]
+hidden_size_conv_list = [25, 50]
+kernel_size_list = [3, 5]
+padding_list = [1, 2]
+hidden_size_full_list = [50, 100]
+dropout_full_list = [0.1, 0.4]
+hidden_size_combo_list = [50, 100]
+dropout_combo_list = [0.1, 0.4]
+lr_list = [0.1, 0.01]
+weight_decay_list = [0.0001, 0.00001]
 
 # Loss function
 mse_loss = torch.nn.MSELoss(size_average=True)
@@ -161,7 +123,7 @@ for hidden_size_conv in hidden_size_conv_list:
 
                                 train_CNN(train_x_std_stack_nonConst, train_x_std_tuple, train_y_tuple, cnn, optimizer, mse_loss, num_epochs, batch_size)
                                 
-                                val_r2 = r2(cnn, batch_size, val_x_std_stack_nonConst, val_x_std_tuple, val_y_tuple)
+                                val_r2 = r2(cnn, batch_size, val_x_std_stack_nonConst, val_x_std_tuple, val_y_tuple, get_pred=False)
                                 print('Validation R^2: ' + str(val_r2))
                                 print()
                                 print()

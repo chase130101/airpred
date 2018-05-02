@@ -81,7 +81,7 @@ def get_monitorData_indices(sequence):
     return ordered_response_indices
 
 
-def r2(model, batch_size, x_stack_nonConst, x_tuple, y_tuple):
+def r2(model, batch_size, x_stack_nonConst, x_tuple, y_tuple, get_pred=False):
     """Computes R-squared
     
     Arguments:
@@ -123,8 +123,11 @@ def r2(model, batch_size, x_stack_nonConst, x_tuple, y_tuple):
         # concatenate new predictions with ones from previous batches
         y += y_batch
         pred += pred_batch
-        
-    return sklearn.metrics.r2_score(y, pred)
+    
+    if get_pred == False:
+        return sklearn.metrics.r2_score(y, pred)
+    elif get_pred == True:
+        return sklearn.metrics.r2_score(y, pred), pred
 
 
 def get_nonConst_vars(data, site_var_name='site', y_var_name='MonitorData', cutoff=1000):
@@ -191,6 +194,6 @@ def train_CNN(train_x_std_stack_nonConst, train_x_std_tuple, train_y_tuple, cnn,
 
         if epoch+1 % 25 == 0:
             print('Epoch loss after epoch ' + str(epoch+1) + ': ' + str(epoch_loss))
-            print('Train R^2 after epoch ' + str(epoch+1) + ': ' + str(r2(cnn, batch_size, train_x_std_stack_nonConst, train_x_std_tuple, train_y_tuple)))
+            print('Train R^2 after epoch ' + str(epoch+1) + ': ' + str(r2(cnn, batch_size, train_x_std_stack_nonConst, train_x_std_tuple, train_y_tuple, get_pred=False)))
     
     return None
