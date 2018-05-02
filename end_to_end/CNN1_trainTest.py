@@ -78,7 +78,7 @@ test_x_std_stack_nonConst = Variable(torch.transpose(test_x_std_stack_nonConst, 
 
 
 num_epochs = 51
-batch_size = 128
+batch_size = 256
 input_size_conv = train_x_std_nonConst.shape[1]
 input_size_full = train_x_std_all.shape[1]
 
@@ -87,11 +87,11 @@ hidden_size_conv = 25
 kernel_size = 3
 padding = 1
 hidden_size_full = 50
-dropout_full = 0.1
-hidden_size_combo = 50
-dropout_combo = 0.1
-lr = 0.1
-weight_decay = 0.0001
+dropout_full = 0.4
+hidden_size_combo = 100
+dropout_combo = 0.4
+lr = 0.01
+weight_decay = 0.00001
 
 # Loss function
 mse_loss = torch.nn.MSELoss(size_average=True)
