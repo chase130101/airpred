@@ -108,6 +108,7 @@ def cross_validation(data, model, hyperparam_dict, num_folds, y_var_name='Monito
     # indices for cv train, test splits
     cv_splits = cross_validation_splits(data, num_folds, site_var_name=site_var_name)
 
+    # split dataset into x, y, and site
     x, y, sites = X_y_site_split(data, y_var_name=y_var_name, site_var_name=site_var_name)
     
     # get all hyper-parameter combinations based on input dictionary

@@ -16,7 +16,7 @@ datasets = ["ridgeImp", "rfImp"]
 
 
 config = configparser.RawConfigParser()
-config.read('config/py_config.ini')
+config.read("config/py_config.ini")
 
 
 parser = argparse.ArgumentParser()
@@ -61,29 +61,29 @@ print("Training model \"{}\" on dataset \"{}\"...)".format(args.model, args.data
 
 if args.model == "ridge":
     ridge = sklearn.linear_model.Ridge(random_state=1, normalize=True, fit_intercept=True)
-    parameter_grid_ridge = {'alpha' : [0.1, 0.01, 0.001, 0.0001, 0.00001]}
-    cv_r2, best_hyperparams = cross_validation(data=train, model=ridge, hyperparam_dict=parameter_grid_ridge, num_folds=4, y_var_name='MonitorData', site_var_name='site')
-    print('Cross-validation R^2: ' + str(cv_r2))
-    print('Best hyper-parameters: ' + str(best_hyperparams))
-    pickle.dump(best_hyperparams, open(config["Reg_Best_Hyperparams"]["ridge"], 'wb'))
+    parameter_grid_ridge = {"alpha" : [0.1, 0.01, 0.001, 0.0001, 0.00001]}
+    cv_r2, best_hyperparams = cross_validation(data=train, model=ridge, hyperparam_dict=parameter_grid_ridge, num_folds=4, y_var_name="MonitorData", site_var_name="site")
+    print("Cross-validation R^2: " + str(cv_r2))
+    print("Best hyper-parameters: " + str(best_hyperparams))
+    pickle.dump(best_hyperparams, open(config["Reg_Best_Hyperparams"]["ridge"], "wb"))
 
 elif args.model == "rf":
     rf = sklearn.ensemble.RandomForestRegressor(n_estimators=200, random_state=1, n_jobs=-1)
-    parameter_grid_rf = {'max_features' : [10, 15, 20, 25]}
-    cv_r2, best_hyperparams = cross_validation(data=train, model=rf, hyperparam_dict=parameter_grid_rf, num_folds=4, y_var_name='MonitorData', site_var_name='site')
-    print('Cross-validation R^2: ' + str(cv_r2))
-    print('Best hyper-parameters: ' + str(best_hyperparams))
-    pickle.dump(best_hyperparams, open(config["Reg_Best_Hyperparams"]["rf"], 'wb'))
+    parameter_grid_rf = {"max_features" : [10, 15, 20, 25]}
+    cv_r2, best_hyperparams = cross_validation(data=train, model=rf, hyperparam_dict=parameter_grid_rf, num_folds=4, y_var_name="MonitorData", site_var_name="site")
+    print("Cross-validation R^2: " + str(cv_r2))
+    print("Best hyper-parameters: " + str(best_hyperparams))
+    pickle.dump(best_hyperparams, open(config["Reg_Best_Hyperparams"]["rf"], "wb"))
 
 elif args.model == "xgb":
     xgboost = xgb.XGBRegressor(random_state=1, n_jobs=-1)
 
     #Information on gradient boosting parameter tuning
     #https://machinelearningmastery.com/configure-gradient-boosting-algorithm/
-    parameter_grid_xgboost = {'learning_rate': [0.001, 0.01, 0.05, 0.1], 'max_depth': [4, 6, 8, 10], 'n_estimators': [100, 250, 500, 750, 1000]}
+    parameter_grid_xgboost = {"learning_rate": [0.001, 0.01, 0.05, 0.1], "max_depth": [4, 6, 8, 10], "n_estimators": [100, 250, 500, 750, 1000]}
 
-    cv_r2, best_hyperparams = cross_validation(data=train, model=xgboost, hyperparam_dict=parameter_grid_xgboost, num_folds=4, y_var_name='MonitorData', site_var_name='site')
-    print('Cross-validation R^2: ' + str(cv_r2))
-    print('Best hyper-parameters: ' + str(best_hyperparams))
-    pickle.dump(best_hyperparams, open(config["Reg_Best_Hyperparams"]["xgb"], 'wb'))
+    cv_r2, best_hyperparams = cross_validation(data=train, model=xgboost, hyperparam_dict=parameter_grid_xgboost, num_folds=4, y_var_name="MonitorData", site_var_name="site")
+    print("Cross-validation R^2: " + str(cv_r2))
+    print("Best hyper-parameters: " + str(best_hyperparams))
+    pickle.dump(best_hyperparams, open(config["Reg_Best_Hyperparams"]["xgb"], "wb"))
 
