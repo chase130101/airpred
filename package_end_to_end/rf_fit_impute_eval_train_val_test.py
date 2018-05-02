@@ -3,12 +3,11 @@ import configparser
 import pandas as pd
 import numpy as np
 import pickle
+
 from data_split_tune_utils import train_test_split, X_y_site_split, train_val_test_split
 from predictiveImputer_mod import PredictiveImputer
 
-
 parser = argparse.ArgumentParser()
-
 
 # add optional validation set argument
 parser.add_argument("--val", 
@@ -69,7 +68,6 @@ config.read("config/py_config.ini")
 
 train, val, test = None, None, None
 
-
 if args.val:
     train = pd.read_csv(config["data"]["trainV"])
     val   = pd.read_csv(config["data"]["valV"])
@@ -79,17 +77,22 @@ else:
     train = pd.read_csv(config["data"]["train"])
     test  = pd.read_csv(config["data"]["test"])
 
+# set seed for reproducibility
 np.random.seed(1)
 
+# split train up; only fit imputer on part of train set due to memory/time
 train1, train2 = train_test_split(train, train_prop=args.impute_split, site_var_name="site")
 
+# split train and test datasets into x, y, and site
 train1_x, train1_y, train1_sites = X_y_site_split(train1, y_var_name="MonitorData", site_var_name="site")
 train2_x, train2_y, train2_sites = X_y_site_split(train2, y_var_name="MonitorData", site_var_name="site")
 test_x, test_y, test_sites = X_y_site_split(test, y_var_name="MonitorData", site_var_name="site")
 
+# create imputer and fit on part of train set
 rf_imputer = PredictiveImputer(max_iter=args.max_iter, initial_strategy=args.initial_strategy, f_model="RandomForest")
 rf_imputer.fit(train1_x, max_features=args.max_features, n_estimators=args.n_estimators, n_jobs=-1, verbose=0, random_state=1)
 
+### make imputations on train and test data matrices and create dataframes with imputation R^2 evaluations; computed weighted R^2 values
 train1_x_imp, train1_r2_scores_df = rf_imputer.transform(train1_x, evaluate=True, backup_impute_strategy=args.backup_strategy)
 train1_r2_scores_df.columns = ["Train1_R2", "Train1_num_missing"]
 train1_r2_scores_df.loc[max(train1_r2_scores_df.index)+1, :] = [np.average(train1_r2_scores_df.loc[:, "Train1_R2"].values,
@@ -109,6 +112,7 @@ test_r2_scores_df.loc[max(test_r2_scores_df.index)+1, :] = [np.average(test_r2_s
                                                                    weights = test_r2_scores_df.loc[:, "Test_num_missing"].values,
                                                                    axis=0), np.mean(test_r2_scores_df.loc[:, "Test_num_missing"].values)]
 
+### convert imputed train and test data matrices back into pandas dataframes with column names
 cols = ["site", "MonitorData"] + list(train1_x.columns)
 train1_imp_df = pd.DataFrame(np.concatenate([train1_sites.values.reshape(len(train1_sites), -1),
                                               train1_y.values.reshape(len(train1_y), -1),
@@ -125,40 +129,49 @@ test_imp_df = pd.DataFrame(np.concatenate([test_sites.values.reshape(len(test_si
                                               test_x_imp], axis=1),
                                               columns=cols)
 
+# put R^2 evaluations for train and test datasets into same pandas dataframe
 var_df = pd.DataFrame(np.array(cols[2:] + ["Weighted_Mean_R2"]).reshape(len(cols)-2+1, -1), columns=["Variable"])
-
 train_imp_df = pd.concat([train1_imp_df, train2_imp_df])
+
+# recombine partial train sets (both imputed) into single train set
 train_imp_df = train_imp_df.reset_index().sort_values(["site", "index"])
 train_imp_df.drop("index", axis=1, inplace=True)
 train_imp_df.reset_index(inplace=True, drop=True)
+
+# save evaluations and imputed train and test datasets
 train_imp_df.to_csv(config["RF_Imputation"]["train"], index=False)
 test_imp_df.to_csv(config["RF_Imputation"]["test"], index=False)
 #pickle.dump(rf_imputer, open("rfV_imputer.pkl", "wb"))
 
 
 if args.val:
+    # split val into x, y, and site
     val_x, val_y, val_sites = X_y_site_split(val, y_var_name="MonitorData", site_var_name="site")
+    
+    ### make imputations on val data matrix and create dataframe with imputation R^2 evaluations; computed weighted R^2 values
     val_x_imp, val_r2_scores_df = rf_imputer.transform(val_x, evaluate = True, backup_impute_strategy = "mean")
     val_r2_scores_df.columns = ["Val_R2", "Val_num_missing"]
-
     val_r2_scores_df.loc[max(val_r2_scores_df.index)+1, :] = [np.average(val_r2_scores_df.loc[:, "Val_R2"].values,
                                                                        weights = val_r2_scores_df.loc[:, "Val_num_missing"].values,
                                                                        axis=0), np.mean(val_r2_scores_df.loc[:, "Val_num_missing"].values)]
-
+    
+    ### convert imputed val data matrix back into pandas dataframes with column names
     val_imp_df = pd.DataFrame(np.concatenate([val_sites.values.reshape(len(val_sites), -1),
                                                   val_y.values.reshape(len(val_y), -1),
                                                   val_x_imp], axis=1),
                                                   columns=cols)
 
+    # save imputed val dataset
     val_imp_df.to_csv(config["RF_Imputation"]["val"], index=False)
 
+    # put R^2 evaluations for train, val, and test datasets into same pandas dataframe
     r2_scores_df = pd.concat([var_df, train1_r2_scores_df, train2_r2_scores_df, val_r2_scores_df, test_r2_scores_df], axis=1)
 
+    # save evaluations
     r2_scores_df.to_csv(config["RF_Imputation"]["r2_scores"], index=False)
 
 
 else:
+    # put R^2 evaluations for train and test datasets into same pandas dataframe and save
     r2_scores_df = pd.concat([var_df, train1_r2_scores_df, train2_r2_scores_df, test_r2_scores_df], axis=1)
     r2_scores_df.to_csv(config["RF_Imputation"]["r2_scores"], index=False)
-
-

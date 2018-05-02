@@ -58,16 +58,17 @@ test_split = 1. - args.train_split - args.val_split
 
 data = pd.read_csv(config["data"]["data_to_impute"])
 
+# set seed for reproducibility
 np.random.seed(1)
 
-if args.val: # create validation set
+if args.val: # split data into train, validation, and test sets
     train, val, test = train_val_test_split(data, train_prop=args.train_split, test_prop=test_split, site_var_name="site")
     train.to_csv(config["data"]["trainV"], index=False)
     val.to_csv(  config["data"]["valV"], index=False)
     test.to_csv( config["data"]["testV"], index=False)
 
 
-else:
+else: # split data into train and test sets
     train, test = train_test_split(data, train_prop=args.train_split, site_var_name="site")
     train.to_csv(config["data"]["train"], index=False)
     test.to_csv(config["data"]["test"], index=False)
