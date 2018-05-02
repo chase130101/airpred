@@ -127,7 +127,7 @@ def r2(model, batch_size, x_stack_nonConst, x_tuple, y_tuple, get_pred=False):
     if get_pred == False:
         return sklearn.metrics.r2_score(y, pred)
     elif get_pred == True:
-        return sklearn.metrics.r2_score(y, pred), pred
+        return sklearn.metrics.r2_score(y, pred), [pred[i][0] for i in range(len(pred))]
 
 
 def get_nonConst_vars(data, site_var_name='site', y_var_name='MonitorData', cutoff=1000):
