@@ -16,6 +16,27 @@ train = pd.read_csv('../data/trainV_ridgeImp.csv')
 val = pd.read_csv('../data/valV_ridgeImp.csv')
 test = pd.read_csv('../data/testV_ridgeImp.csv')
 
+print(len(train))
+print(len(val))
+print(len(test))
+
+### delete sites from datasets where all monitor outputs are NaN
+train_sites_all_nan_df = pd.DataFrame(np.isnan(train.groupby('site').sum()['MonitorData']))
+train_sites_to_delete = list(train_sites_all_nan_df[train_sites_all_nan_df['MonitorData'] == True].index)
+train = train[~train['site'].isin(train_sites_to_delete)]
+
+val_sites_all_nan_df = pd.DataFrame(np.isnan(val.groupby('site').sum()['MonitorData']))
+val_sites_to_delete = list(val_sites_all_nan_df[val_sites_all_nan_df['MonitorData'] == True].index)
+val = val[~val['site'].isin(val_sites_to_delete)]
+
+test_sites_all_nan_df = pd.DataFrame(np.isnan(test.groupby('site').sum()['MonitorData']))
+test_sites_to_delete = list(test_sites_all_nan_df[test_sites_all_nan_df['MonitorData'] == True].index)
+test = test[~test['site'].isin(test_sites_to_delete)]
+
+print(len(train))
+print(len(val))
+print(len(test))
+
 ### split train, val, and test into x, y, and sites
 train_x, train_y, train_sites = X_y_site_split(train, y_var_name='MonitorData', site_var_name='site')
 val_x, val_y, val_sites = X_y_site_split(val, y_var_name='MonitorData', site_var_name='site')
@@ -82,7 +103,7 @@ test_x_std_stack_nonConst = Variable(torch.transpose(test_x_std_stack_nonConst, 
 
 
 
-num_epochs = 51
+num_epochs = 5
 batch_size = 128
 input_size_conv = train_x_std_nonConst.shape[1]
 input_size_full = train_x_std_all.shape[1]

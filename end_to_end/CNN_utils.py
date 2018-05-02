@@ -76,12 +76,9 @@ def get_monitorData_indices(sequence):
     """
     response_indicator_vec = sequence == sequence
     num_responses = torch.sum(response_indicator_vec)
-    if num_responses > 0:
-        response_indices = torch.sort(response_indicator_vec, dim=0, descending=True)[1][:num_responses]
-        ordered_response_indices = torch.sort(response_indices)[0]
-        return ordered_response_indices
-    else:
-        return torch.zeros(0)
+    response_indices = torch.sort(response_indicator_vec, dim=0, descending=True)[1][:num_responses]
+    ordered_response_indices = torch.sort(response_indices)[0]
+    return ordered_response_indices
 
 
 def r2(model, batch_size, x_stack_nonConst, x_tuple, y_tuple):
@@ -112,17 +109,11 @@ def r2(model, batch_size, x_stack_nonConst, x_tuple, y_tuple):
         y_by_site = []
         x_by_site = []
         y_ind_by_site = []
-        site_ind_with_y = list(np.arange(len(y_tuple_nans)))
         for i in range(len(y_tuple_nans)):
             y_ind = get_monitorData_indices(y_tuple_nans[i])
-            if len(y_ind.numpy()) != 0:
-                y_by_site.append(y_tuple_nans[i][y_ind])
-                y_ind_by_site.append(y_ind)
-                x_by_site.append(x_tuple_batch[i][y_ind])
-            else:
-                print('here r2')
-                site_ind_with_y.remove(i)
-        x_stack_batch_nonConst = x_stack_batch_nonConst[torch.from_numpy(np.array(site_ind_with_y)).long()]      
+            y_by_site.append(y_tuple_nans[i][y_ind])
+            y_ind_by_site.append(y_ind)
+            x_by_site.append(x_tuple_batch[i][y_ind])
         y_batch = list(Variable(torch.cat(y_by_site, dim=0)).data.numpy())
         x_batch = Variable(torch.cat(x_by_site, dim=0)).float()
         
@@ -170,23 +161,19 @@ def train_CNN(train_x_std_stack_nonConst, train_x_std_tuple, train_y_tuple, cnn,
         batches = np.random.choice(np.arange(train_x_std_stack_nonConst.size()[0]), size=(num_batches-1, batch_size), replace=False)
         epoch_loss = 0
 
-        for batch in batches:            
+        for batch in batches:  
+            
+            x_stack_batch_nonConst = train_x_std_stack_nonConst[torch.from_numpy(np.array(batch)).long()]
 
             # get indices for monitor data and actual monitor data
             y_by_site = []
             x_by_site = []
             y_ind_by_site = []
-            batch = list(batch)
             for i in range(len(batch)):
                 y_ind = get_monitorData_indices(train_y_tuple[batch[i]])
-                if len(y_ind.numpy()) != 0:
-                    y_by_site.append(train_y_tuple[batch[i]][y_ind])
-                    y_ind_by_site.append(y_ind)
-                    x_by_site.append(train_x_std_tuple[batch[i]][y_ind])
-                else:
-                    print('here train')
-                    batch.remove(batch[i])
-            x_stack_batch_nonConst = train_x_std_stack_nonConst[torch.from_numpy(np.array(batch)).long()]
+                y_by_site.append(train_y_tuple[batch[i]][y_ind])
+                y_ind_by_site.append(y_ind)
+                x_by_site.append(train_x_std_tuple[batch[i]][y_ind])
             y_batch = Variable(torch.cat(y_by_site, dim=0)).float()
             x_batch = Variable(torch.cat(x_by_site, dim=0)).float()
 
