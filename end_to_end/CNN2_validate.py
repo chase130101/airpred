@@ -74,7 +74,7 @@ val_x_std_stack_nonConst = Variable(torch.transpose(val_x_std_stack_nonConst, 1,
 
 
 num_epochs = 51
-batch_size = 128
+batch_size = 256
 input_size_conv = train_x_std_nonConst.shape[1]
 input_size_full = train_x_std_all.shape[1]
 print('Total number of variables: ' + str(input_size_full))
@@ -88,8 +88,8 @@ hidden_size_full_list = [50, 100]
 dropout_full_list = [0.1, 0.4]
 hidden_size2_full_list = [50, 100]
 dropout2_full_list = [0.1, 0.4]
-lr_list = [0.1, 0.01]
-weight_decay_list = [0.0001, 0.00001]
+lr_list = [0.01]
+weight_decay_list = [0.00001]
 
 # Loss function
 mse_loss = torch.nn.MSELoss(size_average=True)

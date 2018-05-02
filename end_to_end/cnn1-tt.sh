@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -p shared
+#SBATCH -p general
 #SBATCH -N 1 # number of nodes
 #SBATCH -n 1 # number of cores
 #SBATCH --mem 128000 # memory pool for all cores
