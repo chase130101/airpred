@@ -5,10 +5,10 @@ import sklearn.metrics
 import pickle
 from data_split_tune_utils import X_y_site_split
 
-train = pd.read_csv('../data/train_ridgeImp.csv')
-test = pd.read_csv('../data/test_ridgeImp.csv')
-#train = pd.read_csv('../data/train_rfImp.csv')
-#test = pd.read_csv('../data/test_rfImp.csv')
+#train = pd.read_csv('../data/train_ridgeImp.csv')
+#test = pd.read_csv('../data/test_ridgeImp.csv')
+train = pd.read_csv('../data/train_rfImp.csv')
+test = pd.read_csv('../data/test_rfImp.csv')
 
 # drop rows with no monitor data response value
 train = train.dropna(axis=0)
