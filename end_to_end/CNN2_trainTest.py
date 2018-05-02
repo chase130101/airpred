@@ -7,7 +7,7 @@ import sklearn.preprocessing
 import sklearn.metrics
 from data_split_tune_utils import X_y_site_split
 from CNN_utils import split_sizes_site, split_data, pad_stack_splits, get_monitorData_indices, r2, get_nonConst_vars, train_CNN
-from CNN_architecture import CNN1
+from CNN_architecture import CNN2
 
 np.random.seed(1)
 torch.manual_seed(1)

@@ -36,3 +36,8 @@ data/rf_feature_importances_ridgeImp.csv
 data/test_rfPred_ridgeImp.csv
 data/test_rfPred_ridgeImp.zip
 data/test_ridgePred_ridgeImp.csv
+data/test_cnn1Pred_ridgeVImp.csv
+data/test_cnn2Pred_ridgeVImp.csv
+data/test_xgboostPred_rfImp.csv
+data/test_xgboostPred_ridgeImp.csv
+data/xgboost_feature_importances_ridgeImp.csv
