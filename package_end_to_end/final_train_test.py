@@ -16,7 +16,7 @@ datasets = ["ridgeImp", "rfImp"]
 
 
 config = configparser.RawConfigParser()
-config.read('config/py_config.ini')
+config.read("config/py_config.ini")
 
 
 parser = argparse.ArgumentParser()
@@ -62,14 +62,14 @@ if train == None or test == None: # failsafe
 
 train = train.dropna(axis=0)
 test = test.dropna(axis=0)
-train_x, train_y, train_sites = X_y_site_split(train, y_var_name='MonitorData', site_var_name='site')
-test_x, test_y, test_sites = X_y_site_split(test, y_var_name='MonitorData', site_var_name='site')
+train_x, train_y, train_sites = X_y_site_split(train, y_var_name="MonitorData", site_var_name="site")
+test_x, test_y, test_sites = X_y_site_split(test, y_var_name="MonitorData", site_var_name="site")
 
 
 print("Training model \"{}\" on dataset \"{}\"...)".format(args.model, args.dataset))
 
 if args.model == "ridge":
-    best_hyperparams = pickle.load(open(config["Reg_Best_Hyperparams"]["ridge"], 'rb'))
+    best_hyperparams = pickle.load(open(config["Reg_Best_Hyperparams"]["ridge"], "rb"))
     ridge = sklearn.linear_model.Ridge(random_state=1, normalize=True, fit_intercept=True)
     for key in list(best_hyperparams.keys()):
         setattr(ridge, key, best_hyperparams[key])
@@ -77,15 +77,15 @@ if args.model == "ridge":
     ridge.fit(train_x, train_y)
     test_pred_ridge = ridge.predict(test_x)
     test_r2_ridge = sklearn.metrics.r2_score(test_y, test_pred_ridge)
-    print('Test R^2: ' + str(test_r2_ridge))
+    print("Test R^2: " + str(test_r2_ridge))
 
-    test['MonitorData_pred'] = pd.Series(test_pred_ridge, index=test.index)
+    test["MonitorData_pred"] = pd.Series(test_pred_ridge, index=test.index)
     test.to_csv(config["Regression"]["ridge_pred"], index=False)
-    pickle.dump(ridge, open(config["Regression"]["ridge_final"], 'wb'))
+    pickle.dump(ridge, open(config["Regression"]["ridge_final"], "wb"))
 
 
 elif args.model == "rf":
-    best_hyperparams = pickle.load(open(config["Reg_Best_Hyperparams"]["rf"], 'rb'))
+    best_hyperparams = pickle.load(open(config["Reg_Best_Hyperparams"]["rf"], "rb"))
     rf = sklearn.ensemble.RandomForestRegressor(n_estimators=500, random_state=1, n_jobs=-1)
     for key in list(best_hyperparams.keys()):
         setattr(rf, key, best_hyperparams[key])
@@ -93,19 +93,19 @@ elif args.model == "rf":
     rf.fit(train_x, train_y)
     test_pred_rf = rf.predict(test_x)
     test_r2_rf = sklearn.metrics.r2_score(test_y, test_pred_rf)
-    print('Test R^2: ' + str(test_r2_rf))
+    print("Test R^2: " + str(test_r2_rf))
 
-    test['MonitorData_pred'] = pd.Series(test_pred_rf, index=test.index)
-    test.to_csv('../data/test_rfPred.csv', index=False)
-    #pickle.dump(rf, open('rf_final.pkl', 'wb'))
+    test["MonitorData_pred"] = pd.Series(test_pred_rf, index=test.index)
+    test.to_csv("../data/test_rfPred.csv", index=False)
+    #pickle.dump(rf, open("rf_final.pkl", "wb"))
 
-    feature_importance_df = pd.DataFrame(rf.feature_importances_.reshape(len(rf.feature_importances_), -1), columns=['RF_Feature_Importance'])
-    feature_importance_df['Variable'] = pd.Series(train_x.columns, index=feature_importance_df.index)
-    feature_importance_df.to_csv(config["Regression"]['rf_fti'], index=False)                                      
+    feature_importance_df = pd.DataFrame(rf.feature_importances_.reshape(len(rf.feature_importances_), -1), columns=["RF_Feature_Importance"])
+    feature_importance_df["Variable"] = pd.Series(train_x.columns, index=feature_importance_df.index)
+    feature_importance_df.to_csv(config["Regression"]["rf_fti"], index=False)                                      
 
 
 elif args.model == "xgb":
-    best_hyperparams = pickle.load(open(config["Reg_Best_Hyperparams"]["xgb"], 'rb'))
+    best_hyperparams = pickle.load(open(config["Reg_Best_Hyperparams"]["xgb"], "rb"))
 
     xgboost = xgb.XGBRegressor(random_state=1, n_jobs=-1)
     for key in list(best_hyperparams.keys()):
@@ -114,17 +114,12 @@ elif args.model == "xgb":
     xgboost.fit(train_x, train_y)
     test_pred_xgboost = xgboost.predict(test_x)
     test_r2_xgboost = sklearn.metrics.r2_score(test_y, test_pred_xgboost)
-    print('Test R^2: ' + str(test_r2_xgboost))
+    print("Test R^2: " + str(test_r2_xgboost))
 
-    test['MonitorData_pred'] = pd.Series(test_pred_xgboost, index=test.index)
-    test.to_csv(config["Regression"]['xgb_pred'], index=False)
-    #pickle.dump(xgboost, open('xgboost_final.pkl', 'wb'))
+    test["MonitorData_pred"] = pd.Series(test_pred_xgboost, index=test.index)
+    test.to_csv(config["Regression"]["xgb_pred"], index=False)
+    #pickle.dump(xgboost, open("xgboost_final.pkl", "wb"))
 
-    feature_importance_df = pd.DataFrame(xgboost.feature_importances_.reshape(len(xgboost.feature_importances_), -1), columns=['XGBoost_Feature_Importance'])
-    feature_importance_df['Variable'] = pd.Series(train_x.columns, index=feature_importance_df.index)
-    feature_importance_df.to_csv(config["Regression"]['xgb_fti'], index=False)  
-
-    #Variable importance plot
-    #xgb.plot_importance(model, max_num_features=20)
-    #pyplot.show()
-
+    feature_importance_df = pd.DataFrame(xgboost.feature_importances_.reshape(len(xgboost.feature_importances_), -1), columns=["XGBoost_Feature_Importance"])
+    feature_importance_df["Variable"] = pd.Series(train_x.columns, index=feature_importance_df.index)
+    feature_importance_df.to_csv(config["Regression"]["xgb_fti"], index=False)

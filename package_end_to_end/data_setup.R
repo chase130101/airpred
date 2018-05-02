@@ -1,7 +1,7 @@
 #Load packages
 require(data.table)
 require(dplyr)
-source("data_setup_config.R")
+source('data_setup_config.R')
 
 #Read data
 #pollution_data = fread('../data/assembled_data.csv')
