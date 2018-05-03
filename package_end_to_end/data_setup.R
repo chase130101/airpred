@@ -1,11 +1,10 @@
 #Load packages
 require(data.table)
 require(dplyr)
-
-# Read config file
-source("config/data_setup_config.R")
+source('data_setup_config.R')
 
 #Read data
+#pollution_data = fread('../data/assembled_data.csv')
 pollution_data = readRDS(POLLUTION_DATA_PATH)
 location_census_data = fread(CENSUS_DATA_PATH)
 

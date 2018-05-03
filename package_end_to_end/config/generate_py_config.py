@@ -4,37 +4,46 @@ import configparser
 
 config = configparser.RawConfigParser()
 
-config["RF_Train_Test_Imputation"] = {
-             'data_to_impute_path'   : '../data/data_to_impute.csv',
-             'train_imputed_rf_path' : '../data/train_rfImp.csv',
-             'test_imputed_rf_path'  : '../data/test_rfImp.csv',
-             'rf_impute_model'       : 'rf_imputer.pkl'
+
+config["data"] = {
+             'train'                : '../data/train.csv',
+             'test'                 : '../data/test.csv',
+             'trainV'               : '../data/trainV.csv',
+             'valV'                 : '../data/valV.csv',
+             'testV'                : '../data/testV.csv',
+             'data_to_impute'       : '../data/data_to_impute.csv',      
 }
 
 
-config["RF_Train_Test_Val_Imputation"] = {
-             'data_to_impute_path'   : '../data/data_to_impute.csv',
-             'train_imputed_rf_path' : '../data/trainV_rfImp.csv',
-             'val_imputed_rf_path'   : '../data/valV_rfImp.csv',
-             'test_imputed_rf_path'  : '../data/testV_rfImp.csv',
-             'rf_impute_model'       : 'rfV_imputer.pkl'
+config["RF_Imputation"] = {
+             'train'                 : '../data/train_rfImp.csv',
+             'val'                   : '../data/val_rfImp.csv',
+             'test'                  : '../data/test_rfImp.csv',
+             'r2_scores'             : '../data/r2_scores_rfImp.csv',
 }
 
 
-config["Ridge_Train_Test_Imputation"] = {
-             'data_to_impute_path'      : '../data/data_to_impute.csv',
-             'train_imputed_ridge_path' : '../data/train_ridgeImp.csv',
-             'test_imputed_ridge_path'  : '../data/test_ridgeImp.csv',
-             'ridge_impute_model'       : 'ridge_imputer.pkl'
+config["Ridge_Imputation"] = {
+             'train'                 : '../data/train_ridgeImp.csv',
+             'val'                   : '../data/val_ridgeImp.csv',
+             'test'                  : '../data/test_ridgeImp.csv',
+             'r2_scores'             : '../data/r2_scores_ridgeImp.csv',
+             'model'                 : 'ridge_imputer.pkl'
 }
 
+config["Reg_Best_Hyperparams"] = {
+             'ridge'                 : 'best_ridge_hyperparams.pkl',
+             'rf'                    : 'best_rf_hyperparams.pkl',
+             'xgb'                   : 'best_xgboost_hyperparams.pkl',  
+}
 
-config["Ridge_Train_Test_Val_Imputation"] = {
-             'data_to_impute_path'      : '../data/data_to_impute.csv',
-             'train_imputed_ridge_path' : '../data/trainV_ridgeImp.csv',
-             'val_imputed_ridge_path'   : '../data/valV_ridgeImp.csv',
-             'test_imputed_ridge_path'  : '../data/testV_ridgeImp.csv',
-             'rf_impute_model'          : 'ridgeV_imputer.pkl'
+config["Regression"] = {
+             'ridge_pred'            : '../data/test_ridgePred.csv',
+             'ridge_final'           : 'ridge_final.pkl',
+             'rf_pred'               : '../data/test_rfPred.csv',
+             'rf_fti'                 : '../data/rf_feature_importances.csv',
+             'xgb_pred'              : '../data/test_xgboostPred.csv',
+             'xgb_fti'                : '../data/xgboost_feature_importances.csv',      
 }
 
 
