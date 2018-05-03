@@ -77,7 +77,7 @@ test_x_std_stack_nonConst = pad_stack_splits(test_x_std_tuple_nonConst, np.array
 test_x_std_stack_nonConst = Variable(torch.transpose(test_x_std_stack_nonConst, 1, 2))
 
 
-num_epochs = 21
+num_epochs = 41
 batch_size = 128
 input_size_conv = train_x_std_nonConst.shape[1]
 input_size_full = train_x_std_all.shape[1]
