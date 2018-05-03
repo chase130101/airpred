@@ -48,14 +48,14 @@ def split_data(data, split_sizes, dim=0):
         - (tuple of torch.Tensor): Desired blocks of dataset contained within a tuple
     """
     if dim < 0:
-        dim += tensor.dim()
+        dim += data.dim()
     
-    dim_size = tensor.size(dim)
+    dim_size = data.size(dim)
     if dim_size != torch.sum(torch.Tensor(split_sizes)):
         raise KeyError("Sum of split sizes exceeds tensor dim")
     
     splits = torch.cumsum(torch.Tensor([0]+split_sizes), dim=0)[:-1]
-    return tuple(tensor.narrow(int(dim), int(start), int(length)) 
+    return tuple(data.narrow(int(dim), int(start), int(length)) 
                  for start, length in zip(splits, split_sizes))
 
 
@@ -110,20 +110,56 @@ def get_monitorData_indices(sequence):
     return ordered_response_indices
 
 
-def r2(model, batch_size, x_stack_nonConst, x_tuple, y_tuple, get_pred=False):
-    """Returns R-squared for predictions of model on a given dataset
+def get_nonConst_vars(data, site_var_name='site', y_var_name='MonitorData', cutoff=1000):
+    """Gets column names for variables that are not constant throughout site sequence
+    - Associated feature values can be used in the convolutional layer of a CNN
+    -----------
+    Inputs:
+        - data (pandas.DataFrame): For checking if variables are non-constant
+        - site_var_name (str): Column name for monitor site
+        - y_var_name (str): Column name for monitor output
+        - cutoff (int): Number of unique values a variable needs to have to be considered non-constant
+    -----------
+    Outputs:
+        - nonConst_colNames (list): Names of non-constant variables
+    """
+    site = data.loc[:, site_var_name].values[0]
+    data_site = data[data[site_var_name] == site]
+    data_site_x = data_site.drop([site_var_name, y_var_name], axis=1)
+    
+    nonConst_colNames = []
+    for i in range(data_site_x.shape[1]):
+        if len(np.unique(data_site_x.iloc[:, i].values)) >= cutoff:
+            nonConst_colNames.append(data_site_x.columns[i])
+    
+    return nonConst_colNames
+
+
+def r2(cnn, batch_size, x_stack_nonConst, x_tuple, y_tuple, get_pred=False):
+    """Returns R^2 for predictions of CNN on a given dataset
     - Will return predictions if get_pred is set to True; will only return
     predictions for which there is a corresponding non-missing response value
     - The output from split_data and transposed output from pad_stack_splits as a
     torch.autograd.Variable can be used as arguments for this function
     -----------
     Inputs:
-        - model (torch model): Model used to make predictions
-        - batch_size (int): To determine how many site sequences to read in at a time; should
-        be less than the number of unique sites in data (length of x_tuple or y_tuple)
-        - x_stack_nonConst (torch.autograd.Variable): Matrix of features that change on a daily basis
-        for each site sequence (they are not constant throughout a site sequence)
+        - cnn (torch model): CNN used to make predictions
+        - batch_size (int): To determine how many site sequences to read in at a time; must
+        be less than the number of unique sites in the data that cnn is being evaluated on
+        (length of x_tuple or y_tuple)
+        - x_stack_nonConst (torch.autograd.Variable): 3D matrix of feature vectors for features
+        that change on a daily basis for each site sequence; each 2D matrix along the 0th dimension
+        of x_stack_nonConst should be the set of non-constant feature vectors for a site sequence
+        in chronological order along the 1st dimension; to be used as input to convolutional 
+        layer(s) of cnn
+        - x_tuple (tuple of torch.Tensor): Each value in the tuple should be a 2D matrix of feature vectors 
+        for a site sequence in chronological order along the 0th dimension
         - y_tuple (tuple of torch.Tensor): True response values by sequence, including nans
+        -- Length of x_tuple, length of y_tuple, and 0th dimension of x_stack_nonConst must be equal
+        -- 0th dimension of each 2D matrix in x_tuple, length of each vector in y_tuple, and 2nd dimension of
+        x_stack_nonConst must be equal
+        -- 2D matrices along 1st dimension of x_stack_nonConst, matrices in x_tuple, and vectors in y_tuple
+        should correspond to the same site sequences
         - get_pred (boolean): Default is false; set to True if predictions are desired
     -----------
     Outputs:
@@ -159,7 +195,7 @@ def r2(model, batch_size, x_stack_nonConst, x_tuple, y_tuple, get_pred=False):
         x_batch = Variable(torch.cat(x_by_site, dim=0)).float()
         
         # get model output
-        pred_batch = list(model(x_stack_batch_nonConst, x_batch, y_ind_by_site).data.numpy())
+        pred_batch = list(cnn(x_stack_batch_nonConst, x_batch, y_ind_by_site).data.numpy())
         
         # concatenate new predictions with ones from previous batches
         y += y_batch
@@ -171,53 +207,62 @@ def r2(model, batch_size, x_stack_nonConst, x_tuple, y_tuple, get_pred=False):
         return sklearn.metrics.r2_score(y, pred), [pred[i][0] for i in range(len(pred))]
 
 
-def get_nonConst_vars(data, site_var_name='site', y_var_name='MonitorData', cutoff=1000):
-    """Get column names for variables that are not constant within a site sequence
-    
-    Arguments:
-        data (pandas.DataFrame): For checking if variables are non-constant
-        site_var_name (str): Column name for monitor site
-        y_var_name (str): Column name for monitor output
-        cutoff (int): Number of unique values a variable needs to have to be considered non-constant
+def train_CNN(x_stack_nonConst, x_tuple, y_tuple, cnn, optimizer, loss, num_epochs, batch_size):
+    """Trains CNN on a dataset
+    - The output from split_data and transposed output from pad_stack_splits as a
+    torch.autograd.Variable can be used as arguments for this function
+    -----------
+    Inputs:
+        - x_stack_nonConst (torch.autograd.Variable): 3D matrix of feature vectors for features
+        that change on a daily basis for each site sequence; each 2D matrix along the 0th dimension
+        of x_stack_nonConst should be the set of non-constant feature vectors for a site sequence
+        in chronological order along the 1st dimension; to be used as input to convolutional 
+        layer(s) of cnn
+        - x_tuple (tuple of torch.Tensor): Each value in the tuple should be a 2D matrix of feature vectors 
+        for a site sequence in chronological order along the 0th dimension
+        - y_tuple (tuple of torch.Tensor): True response values by sequence, including nans
+        -- Length of x_tuple, length of y_tuple, and 0th dimension of x_stack_nonConst must be equal
+        -- 0th dimension of each 2D matrix in x_tuple, length of each vector in y_tuple, and 2nd dimension of
+        x_stack_nonConst must be equal
+        -- 2D matrices along 1st dimension of x_stack_nonConst, matrices in x_tuple, and vectors in y_tuple
+        should correspond to the same site sequences
+        - get_pred (boolean): Default is false; set to True if predictions are desired
+        - cnn (torch model): CNN used to make predictions
+        - optimizer (torch optimizer): Optimizer used for training cnn
+        - loss (torch loss function): Loss function to minimize
+        - num_epochs (int): Number of epochs to train cnn for
+        - batch_size (int): To determine how many site sequences to read in at a time; must
+        be less than the number of unique sites in the data that cnn is being evaluated on
+        (length of x_tuple or y_tuple)
+    -----------
+    Outputs:
+        - None
     """
-    site = data.loc[:, site_var_name].values[0]
-    data_site = data[data[site_var_name] == site]
-    data_site_x = data_site.drop([site_var_name, y_var_name], axis=1)
-    
-    nonConst_colNames = []
-    for i in range(data_site_x.shape[1]):
-        if len(np.unique(data_site_x.iloc[:, i].values)) >= cutoff:
-            nonConst_colNames.append(data_site_x.columns[i])
-    
-    return nonConst_colNames
-
-
-def train_CNN(train_x_std_stack_nonConst, train_x_std_tuple, train_y_tuple, cnn, optimizer, loss, num_epochs, batch_size):
-    
     # get number of batches
-    if train_x_std_stack_nonConst.size()[0] % batch_size != 0:
-        num_batches = int(np.floor(train_x_std_stack_nonConst.size()[0]/batch_size) + 1)
+    if x_stack_nonConst.size()[0] % batch_size != 0:
+        num_batches = int(np.floor(x_stack_nonConst.size()[0]/batch_size) + 1)
     else:
-        num_batches = int(train_x_std_stack_nonConst.size()[0]/batch_size)
+        num_batches = int(x_stack_nonConst.size()[0]/batch_size)
 
     for epoch in range(num_epochs):
         # get set of shuffled batches for epoch
-        batches = np.random.choice(np.arange(train_x_std_stack_nonConst.size()[0]), size=(num_batches-1, batch_size), replace=False)
+        batches = np.random.choice(np.arange(x_stack_nonConst.size()[0]), 
+                                   size=(num_batches-1, batch_size), 
+                                   replace=False)
         epoch_loss = 0
-
         for batch in batches:  
-            
-            x_stack_batch_nonConst = train_x_std_stack_nonConst[torch.from_numpy(np.array(batch)).long()]
+            # get non-constant model inputs for this batch
+            x_stack_batch_nonConst = x_stack_nonConst[torch.from_numpy(np.array(batch)).long()]
 
-            # get indices for monitor data and actual monitor data
+            # get indices for which there is monitor data and associated monitor data values and model inputs for this batch
             y_by_site = []
             x_by_site = []
             y_ind_by_site = []
             for i in range(len(batch)):
-                y_ind = get_monitorData_indices(train_y_tuple[batch[i]])
-                y_by_site.append(train_y_tuple[batch[i]][y_ind])
+                y_ind = get_monitorData_indices(y_tuple[batch[i]])
+                y_by_site.append(y_tuple[batch[i]][y_ind])
                 y_ind_by_site.append(y_ind)
-                x_by_site.append(train_x_std_tuple[batch[i]][y_ind])
+                x_by_site.append(x_tuple[batch[i]][y_ind])
             y_batch = Variable(torch.cat(y_by_site, dim=0)).float()
             x_batch = Variable(torch.cat(x_by_site, dim=0)).float()
 
@@ -232,9 +277,10 @@ def train_CNN(train_x_std_stack_nonConst, train_x_std_tuple, train_y_tuple, cnn,
 
             # accumulate loss over epoch
             epoch_loss += loss_batch.data[0]
-        print(epoch+1 % 25)
-        if epoch+1 % 25 == 0:
+            
+        if (epoch+1) % 25 == 0:
             print('Epoch loss after epoch ' + str(epoch+1) + ': ' + str(epoch_loss))
-            print('Train R^2 after epoch ' + str(epoch+1) + ': ' + str(r2(cnn, batch_size, train_x_std_stack_nonConst, train_x_std_tuple, train_y_tuple, get_pred=False)))
+            print('Train R^2 after epoch ' + str(epoch+1) + ': ' + str(r2(cnn, batch_size, x_stack_nonConst, x_tuple, y_tuple, get_pred=False)))
+            print()
     
     return None
