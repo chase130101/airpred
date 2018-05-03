@@ -78,7 +78,7 @@ test_x_std_stack_nonConst = Variable(torch.transpose(test_x_std_stack_nonConst, 
 
 
 num_epochs = 51
-batch_size = 256
+batch_size = 128
 input_size_conv = train_x_std_nonConst.shape[1]
 input_size_full = train_x_std_all.shape[1]
 
