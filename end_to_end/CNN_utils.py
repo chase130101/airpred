@@ -151,9 +151,7 @@ def r2(cnn, batch_size, x_stack_nonConst, x_tuple, y_tuple, get_pred=False):
     -----------
     Inputs:
         - cnn (torch model): CNN used to make predictions
-        - batch_size (int): To determine how many site sequences to read in at a time; must
-        be less than the number of unique sites in the data that cnn is being evaluated on
-        (length of x_tuple or y_tuple)
+        - batch_size (int): To determine how many site sequences to read in at a time
         - x_stack_nonConst (torch.autograd.Variable): 3D matrix of feature vectors for features
         that change on a daily basis for each site sequence; each 2D matrix along the 0th dimension
         of x_stack_nonConst should be the set of non-constant feature vectors for a site sequence
@@ -183,7 +181,6 @@ def r2(cnn, batch_size, x_stack_nonConst, x_tuple, y_tuple, get_pred=False):
         num_batches = int(np.floor(x_stack_nonConst.size()[0]/batch_size)+1)
     else:
         num_batches = int(x_stack_nonConst.size()[0]/batch_size)
-        
     for batch in range(num_batches):
         # get x and y for this batch
         x_stack_batch_nonConst = x_stack_nonConst[batch_size*batch:batch_size*(batch+1)]
@@ -252,7 +249,7 @@ def train_CNN(x_stack_nonConst, x_tuple, y_tuple, cnn, optimizer, loss, num_epoc
         num_batches = int(np.floor(x_stack_nonConst.size()[0]/batch_size) + 1)
     else:
         num_batches = int(x_stack_nonConst.size()[0]/batch_size)
-
+    
     for epoch in range(num_epochs):
         # get set of shuffled batches for epoch
         batches = np.random.choice(np.arange(x_stack_nonConst.size()[0]), 
@@ -287,7 +284,7 @@ def train_CNN(x_stack_nonConst, x_tuple, y_tuple, cnn, optimizer, loss, num_epoc
             # accumulate loss over epoch
             epoch_loss += loss_batch.data[0]
             
-        if (epoch+1) % 5 == 0:
+        if (epoch+1) % 10 == 0:
             print('Epoch loss after epoch ' + str(epoch+1) + ': ' + str(epoch_loss))
             print('Train R^2 after epoch ' + str(epoch+1) + ': ' + str(r2(cnn, batch_size, x_stack_nonConst, x_tuple, y_tuple, get_pred=False)))
             print()

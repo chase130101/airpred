@@ -51,6 +51,27 @@ class CNN1(torch.nn.Module):
 
         return output
     
+    def predict(self, input_conv, input_full):
+        hidden_conv = self.conv1d(input_conv)
+        hidden_conv = self.norm_conv(hidden_conv)
+        hidden_conv = self.relu_conv(hidden_conv)
+        hidden_conv = torch.transpose(torch.cat(hidden_conv, dim=1), 0, 1)
+
+        hidden_full = self.linear_full(input_full)
+        hidden_full = self.norm_full(hidden_full)
+        hidden_full = self.relu_full(hidden_full)
+        hidden_full = self.dropout_full(hidden_full)
+        
+        # concatenate convolution outputs and outputs from fully connected layers
+        hidden_conv__hidden_full = torch.cat([hidden_conv, hidden_full], dim=1)
+        hidden_combo = self.linear1_combo(hidden_conv__hidden_full)
+        hidden_combo = self.norm_combo(hidden_combo)
+        hidden_combo = self.relu_combo(hidden_combo)
+        hidden_combo = self.dropout_combo(hidden_combo)
+        output = self.linear2_combo(hidden_combo)
+        
+        return output
+    
     
 class CNN2(torch.nn.Module):
     def __init__(self, input_size_conv, hidden_size_conv, kernel_size, padding, input_size_full, hidden_size_full, dropout_full, hidden_size2_full, dropout2_full):
@@ -97,4 +118,24 @@ class CNN2(torch.nn.Module):
         hidden_conv_w_response__hidden_full = torch.cat([hidden_conv_w_response, hidden_full], dim=1)
         output = self.linear_combo(hidden_conv_w_response__hidden_full)
 
+        return output
+    
+    def predict(self, input_conv, input_full):
+        hidden_conv = self.conv1d(input_conv)
+        hidden_conv = self.norm_conv(hidden_conv)
+        hidden_conv = self.relu_conv(hidden_conv)
+        hidden_conv = torch.transpose(torch.cat(hidden_conv, dim=1), 0, 1)
+        
+        hidden_full = self.linear_full(input_full)
+        hidden_full = self.norm_full(hidden_full)
+        hidden_full = self.relu_full(hidden_full)
+        hidden_full = self.dropout_full(hidden_full)
+        hidden_full = self.linear2_full(hidden_full)
+        hidden_full = self.relu2_full(hidden_full)
+        hidden_full = self.dropout2_full(hidden_full)
+        
+        # concatenate convolution outputs and outputs from fully connected layers
+        hidden_conv__hidden_full = torch.cat([hidden_conv, hidden_full], dim=1)
+        output = self.linear_combo(hidden_conv__hidden_full)
+        
         return output
