@@ -120,6 +120,7 @@ train_CNN(train_x_std_stack_nonConst, train_x_std_tuple, train_y_tuple, cnn, opt
 train_r2 = r2(cnn, batch_size, train_x_std_stack_nonConst, train_x_std_tuple, train_y_tuple, get_pred=False)
 test_r2, test_pred_cnn = r2(cnn, batch_size, test_x_std_stack_nonConst, test_x_std_tuple, test_y_tuple, get_pred=True)
 
+print()
 print('Train R^2: ' + str(train_r2))
 print('Test R^2: ' + str(test_r2))
 
