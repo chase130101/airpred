@@ -102,7 +102,8 @@ def get_monitorData_indices(sequence):
     - This function is used within the r2 and train_CNN functions below
     -----------
     Inputs:
-        - sequence (torch.Tensor): Sequence of response values for a given site, including nans
+        -  (torch.Tensor): Sequence of response values for a given site, including nans
+        -- At least one value in sequence must be non-missing (sequence cannot be all nans)
     -----------
     Outputs:
         - ordered_response_indices (torch.LongTensor): Sequence of indices for which there is a response
