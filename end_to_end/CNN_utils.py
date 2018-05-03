@@ -4,11 +4,17 @@ from torch.autograd import Variable
 import sklearn.metrics
 
 def split_sizes_site(sites):
-    """Gets the split sizes to split dataset by site for a dataset with multiple sites.
-    Assumes that site-days for with the same site are in blocks of rows in dataset
-    
-    Arguments:
-        sites (array): array indicating the site of each row 
+    """Returns the split sizes to when splitting dataset by site for a dataset with multiple sites
+    - Assumes that site-days for the same site are arranged in blocks of rows in the dataset
+    - The output from this function can be used as an argument for the split_data
+    - The output from this function as a numpy.array can be used as an argument for 
+    the pad_stack_splits function below
+    -----------
+    Inputs:
+        - sites (numpy.array or list): Indicates the site of each row in the dataset
+    -----------
+    Outputs:
+        - split_sizes (list of int): Contains the split sizes
     """
     split_sizes = []
     for i in range(len(sites)):
@@ -17,21 +23,29 @@ def split_sizes_site(sites):
             split_sizes.append(i)
         elif site != sites[i]:
             site = sites[i]
-            split_sizes.append(i - (len(split_sizes)-1)*split_sizes[len(split_sizes)-1])
+            split_sizes.append(i-(len(split_sizes)-1)*split_sizes[len(split_sizes)-1])
         elif i == len(sites)-1:
-            split_sizes.append((i+1) - (len(split_sizes)-1)*split_sizes[len(split_sizes)-1])
+            split_sizes.append((i+1)-(len(split_sizes)-1)*split_sizes[len(split_sizes)-1])
     
     split_sizes = split_sizes[1:]
     return split_sizes
 
 
-def split_data(tensor, split_sizes, dim=0):
-    """Splits the tensor according to chunks of split_sizes.
-    
-    Arguments:
-        tensor (Tensor): tensor to split.
-        split_sizes (list(int)): sizes of chunks
-        dim (int): dimension along which to split the tensor.
+def split_data(data, split_sizes, dim=0):
+    """Splits a dataset into blocks with the sizes indicated by split sizes
+    - The output from the split_sizes_site function above can be used as an argument
+    for this function
+    - The output from this function can be used as an argument for the pad_stack_splits
+    function, r2, and train_CNN functions below
+    -----------
+    Inputs:
+        - data (torch.Tensor): Dataset to split into blocks
+        - split_sizes (list of int): Sizes of blocks; sum of the sizes cannot exceed the length of the tensor
+        along the dimension that it is being split
+        - dim (int): Dimension along which to split data
+    -----------
+    Outputs:
+        - (tuple of torch.Tensor): Desired blocks of dataset contained within a tuple
     """
     if dim < 0:
         dim += tensor.dim()
@@ -46,12 +60,22 @@ def split_data(tensor, split_sizes, dim=0):
 
 
 def pad_stack_splits(site_tuple, split_sizes, x_or_y):
-    """Zero (x) or nan (y) pads site sequences and stacks them into a matrix.
-    
-    Arguments:
-        site_tuple (tuple): tuple of site sequences to pad and stack
-        split_sizes (array): lengths of site sequences
-        x_or_y (string): 'x' or 'y' indicating whether to pad and stack x or y
+    """Zero-pads site sequences containing features (x) or nan-pads site sequences containing
+    the response (y) and stacks them into a matrix
+    - The output from the split_sizes_site as a numpy.array and split_data functions above can 
+    be used as arguments for this function
+    - If zero-padding features of site sequences, a transpose of the output as a torch.autograd.Variable
+    can be used as an argument for the r2 and train_CNN functions below (see tutorial)
+    -----------
+    Inputs:
+        - site_tuple (tuple of torch.Tensor): Blocks of site sequences to pad and stack
+        - split_sizes (numpy.array of int): Lengths of site sequences
+        -- Length of site_tuple must equal length of split_sizes
+        - x_or_y (str): Must be one of 'x' or 'y'; indicates whether to pad and stack 
+        features or response values
+    -----------
+    Outputs:
+        - (torch.Tensor): Matrix of padded features or response values of site sequences
     """
     data_padded_list = []
     for sequence in site_tuple:
@@ -62,17 +86,22 @@ def pad_stack_splits(site_tuple, split_sizes, x_or_y):
             data_padded_list.append(torch.cat((sequence, zero_padding_rows), dim=0))
             
         elif x_or_y == 'y':
-            nan_padding = torch.zeros(max_sequence_length - sequence.size()[0]).double()*np.nan
+            nan_padding = torch.zeros(max_sequence_length-sequence.size()[0]).double()*np.nan
             data_padded_list.append(torch.cat((sequence, nan_padding), dim=0))
             
     return torch.stack(data_padded_list, dim=0)
 
 
 def get_monitorData_indices(sequence):
-    """Gets indices for a site sequence for which there is an output for MonitorData.
-    
-    Arguments:
-        sequence (Tensor): sequence of MonitorData outputs for a given site, including NaNs
+    """Returns indices of a site sequence for which the response value is non-missing
+    - This function is used within the r2 and train_CNN functions below
+    -----------
+    Inputs:
+        - sequence (torch.Tensor): Sequence of response values for a given site, including nans
+    -----------
+    Outputs:
+        - ordered_response_indices (torch.LongTensor): Sequence of indices for which there is a response
+        value for a given site
     """
     response_indicator_vec = sequence == sequence
     num_responses = torch.sum(response_indicator_vec)
@@ -82,13 +111,25 @@ def get_monitorData_indices(sequence):
 
 
 def r2(model, batch_size, x_stack_nonConst, x_tuple, y_tuple, get_pred=False):
-    """Computes R-squared
-    
-    Arguments:
-        model (torch): model to test
-        batch_size (int): to determine how many sequences to read in at a time
-        x_stack (tensor): stack of site sequences
-        y_tuple (tuple): tuple of true y values by sequence, including NaNs
+    """Returns R-squared for predictions of model on a given dataset
+    - Will return predictions if get_pred is set to True; will only return
+    predictions for which there is a corresponding non-missing response value
+    - The output from split_data and transposed output from pad_stack_splits as a
+    torch.autograd.Variable can be used as arguments for this function
+    -----------
+    Inputs:
+        - model (torch model): Model used to make predictions
+        - batch_size (int): To determine how many site sequences to read in at a time; should
+        be less than the number of unique sites in data (length of x_tuple or y_tuple)
+        - x_stack_nonConst (torch.autograd.Variable): Matrix of features that change on a daily basis
+        for each site sequence (they are not constant throughout a site sequence)
+        - y_tuple (tuple of torch.Tensor): True response values by sequence, including nans
+        - get_pred (boolean): Default is false; set to True if predictions are desired
+    -----------
+    Outputs:
+        - (float): R^2 value
+        - (list): Only if get_pred set to True; predictions for which there is a corresponding 
+        non-missing response
     """
     y = []
     pred = []
@@ -105,7 +146,7 @@ def r2(model, batch_size, x_stack_nonConst, x_tuple, y_tuple, get_pred=False):
         x_tuple_batch = x_tuple[batch_size*batch:batch_size*(batch+1)]
         y_tuple_nans = y_tuple[batch_size*batch:batch_size*(batch+1)]
         
-        # get indices for which there is monitor data, associated monitor data values and inputs
+        # get indices for which there is monitor data and associated monitor data values and model inputs
         y_by_site = []
         x_by_site = []
         y_ind_by_site = []
@@ -191,7 +232,7 @@ def train_CNN(train_x_std_stack_nonConst, train_x_std_tuple, train_y_tuple, cnn,
 
             # accumulate loss over epoch
             epoch_loss += loss_batch.data[0]
-
+        print(epoch+1 % 25)
         if epoch+1 % 25 == 0:
             print('Epoch loss after epoch ' + str(epoch+1) + ': ' + str(epoch_loss))
             print('Train R^2 after epoch ' + str(epoch+1) + ': ' + str(r2(cnn, batch_size, train_x_std_stack_nonConst, train_x_std_tuple, train_y_tuple, get_pred=False)))

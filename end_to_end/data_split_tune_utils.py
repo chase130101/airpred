@@ -1,23 +1,44 @@
+"""Description: This is set of functions to be used for data pre-processing and model validation.
+In particular, these functions are useful for datasets that are arranged into sequences, such as
+the air pollution data. We do not, for example, want part of a site sequence to be in the train data
+and the rest of the site sequence to be in the test data. The functions help the user avoid pitfalls 
+like this.
+
+The cross-validation function was written because of the extreme memory usage of scikit-learn's 
+GridSearchCV that is used for tuning models - our function requires much less memory and thus can
+be used for large datasets such as the air pollution dataset.
+"""
 import numpy as np
 import pandas as pd
 import itertools
 import sklearn.metrics
 
 def train_val_test_split(data, train_prop, test_prop, site_var_name='site'):
-    """Splits data into train, validation, test sets by PM2.5 monitor site
-    
-    Arguments:
-        data (pd.DataFrame): Data to be split
-        site_var_name (str): Site ID variable name
-        train_prop (float): Proportion of sites to be put into train set
-        test_prop (float): Proportion of non-train sites to be put into test set
+    """Splits dataset into train, validation, and test sets
+    - Site-days with same monitor site ID don't get split up
+    -----------
+    Inputs:
+        - data (pandas.DataFrame): Dataset to be split
+        - site_var_name (str): Site ID variable name
+        - train_prop (float): Proportion of sites to be put into train set; must be between 0 and 1
+        - test_prop (float): Proportion of sites to be put into test set; must be between 0 and 1
+        -- Sum of train_prop and test_prop must be between 0 and 1
+    -----------    
+    Outputs:
+        - train (pandas.DataFrame): train set
+        - val (pandas.DataFrame): validation set
+        - test (pandas.DataFrame): test set
     """
     # get sites for val/test data
-    val_test_sites = np.random.choice(np.unique(data[site_var_name].values), round(len(np.unique(data[site_var_name].values))*(1-train_prop)), replace=False)
+    val_test_sites = np.random.choice(np.unique(data[site_var_name].values), 
+                                      round(len(np.unique(data[site_var_name].values))*(1-train_prop)), 
+                                      replace=False)
     
     # get sites for test data
     test_prop = test_prop/(1-train_prop)
-    test_sites = np.random.choice(np.unique(val_test_sites), round(len(np.unique(val_test_sites))*test_prop), replace=False)
+    test_sites = np.random.choice(np.unique(val_test_sites), 
+                                  round(len(np.unique(val_test_sites))*test_prop), 
+                                  replace=False)
     
     # get train, val, and test
     train = data[~data[site_var_name].isin(val_test_sites)]
@@ -28,15 +49,22 @@ def train_val_test_split(data, train_prop, test_prop, site_var_name='site'):
 
 
 def train_test_split(data, train_prop, site_var_name='site'):
-    """Splits data into train test sets by PM2.5 monitor site
-    
-    Arguments:
-        data (pandas.DataFrame): Data to be split
-        site_var_name (str): Site ID variable name
-        train_prop (float): Proportion of sites to be put into train set
+    """Splits dataset into train and test sets
+    - Site-days with same monitor site ID don't get split up
+    -----------
+    Inputs:
+        - data (pandas.DataFrame): Dataset to be split
+        - site_var_name (str): Site ID variable name
+        - train_prop (float): Proportion of sites to be put into train set; must be between 0 and 1
+    -----------
+    Outputs:
+        - train (pandas.DataFrame): train set
+        - test (pandas.DataFrame): test set
     """
     # get sites for train data
-    train_sites = np.random.choice(np.unique(data[site_var_name].values), round(len(np.unique(data[site_var_name].values))*train_prop), replace=False)
+    train_sites = np.random.choice(np.unique(data[site_var_name].values), 
+                                   round(len(np.unique(data[site_var_name].values))*train_prop), 
+                                   replace=False)
         
     # get train and test
     train = data[data[site_var_name].isin(train_sites)]
@@ -46,34 +74,50 @@ def train_test_split(data, train_prop, site_var_name='site'):
 
 
 def X_y_site_split(data, y_var_name='MonitorData', site_var_name='site'):
-    """Splits a dataframe into X, y, site ID
-    
-    Arguments:
-        data (pandas.DataFrame): Data to be split
-        y_var_name (string): Response variable name
-        site_var_name (str): Site ID variable name
+    """Splits a dataset into features, response values, and monitor site IDs
+    -----------
+    Inputs:
+        - data (pandas.DataFrame): Dataset to be split
+        - y_var_name (str): Response variable name
+        - site_var_name (str): Site ID variable name
+    -----------
+    Outputs:
+        - X (pandas.DataFrame): Feature columns
+        - y (pandas.Series): Response variable column
+        - sites (pandas.Series): Site variable column
     """
-    data_y = data.loc[:, y_var_name]
-    data_sites = data.loc[:, site_var_name]
-    data_x = data.drop([y_var_name, site_var_name], axis=1)
+    y = data.loc[:, y_var_name]
+    sites = data.loc[:, site_var_name]
+    X = data.drop([y_var_name, site_var_name], axis=1)
     
-    return data_x, data_y, data_sites
+    return X, y, sites
 
 
 def cross_validation_splits(data, num_folds, site_var_name='site'):
     """Returns indices for cross-validation train, test splits
-    Site-days with same site ID don't get split up
-    
-    Arguments:
-        data (pandas.DataFrame): Data to be split
-        site_var_name (string): Site ID variable name
-        num_folds (int): Number of cross-validation folds
+    - Site-days with same monitor site ID don't get split up
+    - This function is used within the cross_validation function below
+    -----------
+    Inputs:
+        - data (pandas.DataFrame): Dataset to be split
+        - site_var_name (str): Site ID variable name
+        - num_folds (int): Number of cross-validation folds; must be less than the number 
+        of unique sites
+    -----------
+    Outputs:
+        - (numpy.array): Set of num_folds tuples; each tuple has its first value a numpy.array 
+        of train indices and as its second value a numpy.array of test indices
     """
     # get site ids for each fold
     try:
-        site_ids_by_fold = np.random.choice(np.unique(data[site_var_name].values), (num_folds, round(len(np.unique(data[site_var_name].values))/num_folds)), replace=False)
+        site_ids_by_fold = np.random.choice(np.unique(data[site_var_name].values), 
+                                            (num_folds, round(len(np.unique(data[site_var_name].values))/num_folds)), 
+                                            replace=False)
     except ValueError:
-        site_ids_by_fold = np.random.choice(np.unique(data[site_var_name].values), (num_folds, round(len(np.unique(data[site_var_name].values))/(num_folds+1))), replace=False)
+        site_ids_by_fold = np.random.choice(np.unique(data[site_var_name].values), 
+                                            (num_folds, round(len(np.unique(data[site_var_name].values))/(num_folds+1))), 
+                                            replace=False)
+        
     site_ids_by_fold = [list(site_ids_by_fold[i]) for i in range(num_folds)]
     leftover_sites = list(np.unique(data[~data[site_var_name].isin(np.unique(site_ids_by_fold))][site_var_name]))
     site_ids_by_fold[0] += leftover_sites
@@ -96,14 +140,24 @@ def cross_validation_splits(data, num_folds, site_var_name='site'):
 
 def cross_validation(data, model, hyperparam_dict, num_folds, y_var_name='MonitorData', site_var_name='site'):
     """Returns best cross-validation R^2 and dictionary of best model hyper-parameters
-    
-    Arguments:
-        data (pandas.DataFrame): To use for folds in cross-validation
-        model (sklearn model): Model to tune
-        hyperparam_dict (dict): Model hyper-parameters to grid search
-        num_folds (int): Number of cross-validation folds
-        y_var_name (string): Response variable name
-        site_var_name (string): Site ID variable name
+    - Site-days with same site ID don't get split up into different folds (this function uses
+    the cross_validation_splits function)
+    ----------- 
+    Inputs:
+        - data (pandas.DataFrame): To use for folds in cross-validation
+        - model (sklearn model): Model to tune
+        - hyperparam_dict (dict): Model hyper-parameters to grid search; keys should be 
+        strings that are names of attributes of the sklearn model being tuned and values
+        should be valid as model attributes
+        - num_folds (int): Number of cross-validation folds; must be less than the number 
+        of unique sites
+        - y_var_name (str): Response variable name
+        - site_var_name (str): Site ID variable name
+    -----------
+    Outputs:
+        - best_mean_r2 (float): Best cross-validation R^2
+        - best_combo_dict (dict): Best model hyper-parameters; keys are strings that are names 
+        of attributes of the tuned sklearn model and values are valid as model attributes
     """
     # indices for cv train, test splits
     cv_splits = cross_validation_splits(data, num_folds, site_var_name=site_var_name)
