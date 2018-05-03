@@ -73,12 +73,13 @@ val_x_std_stack_nonConst = pad_stack_splits(val_x_std_tuple_nonConst, np.array(v
 val_x_std_stack_nonConst = Variable(torch.transpose(val_x_std_stack_nonConst, 1, 2))
 
 
-num_epochs = 51
+num_epochs = 11
 batch_size = 128
 input_size_conv = train_x_std_nonConst.shape[1]
 input_size_full = train_x_std_all.shape[1]
 print('Total number of variables: ' + str(input_size_full))
 print('Total number of non-constant variables: ' + str(input_size_conv))
+print()
 
 # CNN and optimizer hyper-parameters to test
 hidden_size_conv_list = [25, 50]

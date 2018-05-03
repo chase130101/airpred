@@ -47,9 +47,6 @@ class PredictiveImputer(BaseEstimator, TransformerMixin):
         if self.f_model == 'Ridge':                                             
             #self.estimators_ = [[Ridge(**kwargs) for i in range(X.shape[1])] for j in range(self.max_iter)]
             self.estimators_ = [Ridge(**kwargs) for i in range(X.shape[1])]
-        elif self.f_model == 'KNN':
-            #self.estimators_ = [[KNeighborsRegressor(n_neighbors=min(5, sum(~X_nan[:, i])), **kwargs) for i in range(X.shape[1])] for j in range(self.max_iter)]
-            self.estimators_ = [KNeighborsRegressor(n_neighbors=min(5, sum(~X_nan[:, i])), **kwargs) for i in range(X.shape[1])]
         
         print('Number of variables: ' + str(len(least_by_nan)))
         for iter in range(self.max_iter):
