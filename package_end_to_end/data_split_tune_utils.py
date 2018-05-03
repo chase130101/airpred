@@ -2,7 +2,8 @@
 In particular, these functions are useful for datasets that are arranged into sequences, such as
 the air pollution data. We do not, for example, want part of a site sequence to be in the train data
 and the rest of the site sequence to be in the test data. The functions help the user avoid pitfalls 
-like this.
+like this. The other scripts in the repository and our tutorial will give the user more 
+insight into how all of these functions can be used.
 
 The cross-validation function was written because of the extreme memory usage of scikit-learn's 
 GridSearchCV that is used for tuning models - our function requires much less memory and thus can

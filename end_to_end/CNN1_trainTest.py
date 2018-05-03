@@ -113,6 +113,7 @@ print('Hidden size combo: ' + str(hidden_size_combo))
 print('Dropout combo: ' + str(dropout_combo))
 print('Learning rate: ' + str(lr))
 print('Weight decay: ' + str(weight_decay))
+print()
 
 train_CNN(train_x_std_stack_nonConst, train_x_std_tuple, train_y_tuple, cnn, optimizer, mse_loss, num_epochs, batch_size)
 
