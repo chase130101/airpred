@@ -77,7 +77,7 @@ test_x_std_stack_nonConst = pad_stack_splits(test_x_std_tuple_nonConst, np.array
 test_x_std_stack_nonConst = Variable(torch.transpose(test_x_std_stack_nonConst, 1, 2))
 
 
-num_epochs = 51
+num_epochs = 11
 batch_size = 128
 input_size_conv = train_x_std_nonConst.shape[1]
 input_size_full = train_x_std_all.shape[1]
@@ -87,10 +87,10 @@ hidden_size_conv = 25
 kernel_size = 3
 padding = 1
 hidden_size_full = 50
-dropout_full = 0.4
-hidden_size2_full = 100
-dropout2_full = 0.4
-lr = 0.01
+dropout_full = 0.1
+hidden_size2_full = 50
+dropout2_full = 0.1
+lr = 0.1
 weight_decay = 0.00001
 
 # Loss function
