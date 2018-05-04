@@ -1,8 +1,8 @@
 ## Description: This is a script that is used to combine the raw data with 
 ## the sensor locations and census data. This script also removes features that
 ## are not needed for modeling and engineers various features that may be useful
-## in predicting PM2.5. The output of this script is the fully preprocessed data
-## in csv format.
+## in predicting PM2.5. The output of this script is the fully pre-processed data
+## in csv format that is ready to be imputed.
 
 
 #Load packages
