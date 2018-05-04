@@ -1,3 +1,7 @@
+"""Description: This script allows the user to tune one of the two CNN architectures in 
+CNN_architecture.py using imputed train and validation sets. The best hyper-parameters from 
+validation will be outputted for the user to see.
+"""
 import argparse
 import configparser
 import pandas as pd
@@ -6,8 +10,12 @@ import torch
 from torch.autograd import Variable
 import sklearn.preprocessing
 import sklearn.metrics
+# this imported function was created for this package to split datasets (see data_split_tune_utils.py)
 from data_split_tune_utils import X_y_site_split
+# these imported functions were created for this package for the purposes of data pre-processing for CNNs, training CNNs, 
+# and evaluation of CNNs (see CNN_utils.py)
 from CNN_utils import split_sizes_site, split_data, pad_stack_splits, get_monitorData_indices, r2, get_nonConst_vars, train_CNN
+# these imported classes are the CNN architectures (see CNN_architecture.py)
 from CNN_architecture import CNN1, CNN2
 
 config = configparser.RawConfigParser()
@@ -23,11 +31,11 @@ parser.add_argument("cnn_type",
 
 args = parser.parse_args()
 
-
+# set seeds for reproducibility
 np.random.seed(1)
 torch.manual_seed(1)
 
-### read in train, val, and test
+### read in train and val sets
 train = pd.read_csv(config["Ridge_Imputation"]["train"])
 val = pd.read_csv(config["Ridge_Imputation"]["val"])
 
@@ -40,21 +48,21 @@ val_sites_all_nan_df = pd.DataFrame(np.isnan(val.groupby('site').sum()['MonitorD
 val_sites_to_delete = list(val_sites_all_nan_df[val_sites_all_nan_df['MonitorData'] == True].index)
 val = val[~val['site'].isin(val_sites_to_delete)]
 
-### split train, val, and test into x, y, and sites
+# split train, val into x, y, and sites
 train_x, train_y, train_sites = X_y_site_split(train, y_var_name='MonitorData', site_var_name='site')
 val_x, val_y, val_sites = X_y_site_split(val, y_var_name='MonitorData', site_var_name='site')
 
-### get dataframes with non-constant features only
+# get dataframes with non-constant features only
 nonConst_vars = get_nonConst_vars(train, site_var_name='site', y_var_name='MonitorData', cutoff=1000)
 train_x_nonConst = train_x.loc[:, nonConst_vars]
 val_x_nonConst = val_x.loc[:, nonConst_vars]
 
-### standardize all features
+# standardize all features
 standardizer_all = sklearn.preprocessing.StandardScaler(with_mean = True, with_std = True)
 train_x_std_all = standardizer_all.fit_transform(train_x)
 val_x_std_all = standardizer_all.transform(val_x)
 
-### standardize non-constant features
+# standardize non-constant features
 standardizer_nonConst = sklearn.preprocessing.StandardScaler(with_mean = True, with_std = True)
 train_x_std_nonConst = standardizer_nonConst.fit_transform(train_x_nonConst)
 val_x_std_nonConst = standardizer_nonConst.transform(val_x_nonConst)
@@ -62,33 +70,34 @@ val_x_std_nonConst = standardizer_nonConst.transform(val_x_nonConst)
 
 
 
-### get split sizes for TRAIN data (splitting by site)
+# get split sizes for TRAIN data (splitting by site)
 train_split_sizes = split_sizes_site(train_sites.values)
 
-### get tuples by site
+# get tuples by site
 train_x_std_tuple_nonConst = split_data(torch.from_numpy(train_x_std_nonConst).float(), train_split_sizes, dim = 0)
 train_x_std_tuple = split_data(torch.from_numpy(train_x_std_all).float(), train_split_sizes, dim = 0)
 train_y_tuple = split_data(torch.from_numpy(train_y.values), train_split_sizes, dim = 0)
 
-### get site sequences stacked into matrix to go through CNN
+# get site sequences stacked into matrix to go through CNN
 train_x_std_stack_nonConst = pad_stack_splits(train_x_std_tuple_nonConst, np.array(train_split_sizes), 'x')
 train_x_std_stack_nonConst = Variable(torch.transpose(train_x_std_stack_nonConst, 1, 2))
 
 
-### get split sizes for VALIDATION data (splitting by site)
+# get split sizes for VALIDATION data (splitting by site)
 val_split_sizes = split_sizes_site(val_sites.values)
 
-### get tuples by site
+# get tuples by site
 val_x_std_tuple_nonConst = split_data(torch.from_numpy(val_x_std_nonConst).float(), val_split_sizes, dim = 0)
 val_x_std_tuple = split_data(torch.from_numpy(val_x_std_all).float(), val_split_sizes, dim = 0)
 val_y_tuple = split_data(torch.from_numpy(val_y.values), val_split_sizes, dim = 0)
 
-### get site sequences stacked into matrix to go through CNN
+# get site sequences stacked into matrix to go through CNN
 val_x_std_stack_nonConst = pad_stack_splits(val_x_std_tuple_nonConst, np.array(val_split_sizes), 'x')
 val_x_std_stack_nonConst = Variable(torch.transpose(val_x_std_stack_nonConst, 1, 2))
 
 
-num_epochs = 11
+# training parameters and model input sizes
+num_epochs = 20
 batch_size = 128
 input_size_conv = train_x_std_nonConst.shape[1]
 input_size_full = train_x_std_all.shape[1]
@@ -96,7 +105,7 @@ print('Total number of variables: ' + str(input_size_full))
 print('Total number of non-constant variables: ' + str(input_size_conv))
 print()
 
-
+# tune CNN1
 if args.cnn_type == "cnn_1":
     # CNN and optimizer hyper-parameters to test
     hidden_size_conv_list = [25, 50]
@@ -112,7 +121,7 @@ if args.cnn_type == "cnn_1":
     # Loss function
     mse_loss = torch.nn.MSELoss(size_average=True)
 
-
+    # grid search
     best_val_r2 = -np.inf
     for hidden_size_conv in hidden_size_conv_list:
         for kernel_size, padding in zip(kernel_size_list, padding_list):
@@ -139,13 +148,16 @@ if args.cnn_type == "cnn_1":
                                     print('Learning rate: ' + str(lr))
                                     print('Weight decay: ' + str(weight_decay))
 
+                                    # train
                                     train_CNN(train_x_std_stack_nonConst, train_x_std_tuple, train_y_tuple, cnn, optimizer, mse_loss, num_epochs, batch_size)
                                     
+                                    # evaluate
                                     val_r2 = r2(cnn, batch_size, val_x_std_stack_nonConst, val_x_std_tuple, val_y_tuple, get_pred=False)
                                     print('Validation R^2: ' + str(val_r2))
                                     print()
                                     print()
                                     
+                                    # keep track of best validation R^2 and hyper-parameters
                                     if val_r2 > best_val_r2:
                                         best_val_r2 = val_r2
                                         best_hidden_size_conv = hidden_size_conv
@@ -167,6 +179,8 @@ if args.cnn_type == "cnn_1":
     print('Best learning rate: ' + str(best_lr))
     print('Best weight decay: ' + str(best_weight_decay))
 
+
+# tune CNN2
 else:
     hidden_size_conv_list = [25, 50]
     kernel_size_list = [3, 5]
@@ -181,7 +195,7 @@ else:
     # Loss function
     mse_loss = torch.nn.MSELoss(size_average=True)
 
-
+    # grid search
     best_val_r2 = -np.inf
     for hidden_size_conv in hidden_size_conv_list:
         for kernel_size, padding in zip(kernel_size_list, padding_list):
@@ -208,13 +222,16 @@ else:
                                     print('Learning rate: ' + str(lr))
                                     print('Weight decay: ' + str(weight_decay))
 
+                                    # train
                                     train_CNN(train_x_std_stack_nonConst, train_x_std_tuple, train_y_tuple, cnn, optimizer, mse_loss, num_epochs, batch_size)
                                     
+                                    # evaluate
                                     val_r2 = r2(cnn, batch_size, val_x_std_stack_nonConst, val_x_std_tuple, val_y_tuple, get_pred=False)
                                     print('Validation R^2: ' + str(val_r2))
                                     print()
                                     print()
                                     
+                                    # keep track of best validation R^2 and hyper-parameters
                                     if val_r2 > best_val_r2:
                                         best_val_r2 = val_r2
                                         best_hidden_size_conv = hidden_size_conv

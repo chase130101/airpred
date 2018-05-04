@@ -1,6 +1,6 @@
 """Description: This script allows the user to train either a ridge regression, random forest,
 or XGBoost model on the full, imputed train set using the best hyper-parameters from cross-validation 
-and evaluate the fitted model on the test set using R^2. The predictions on the test set are saved 
+and evaluate the fitted model on the imputed test set using R^2. The predictions on the test set are saved 
 in a csv as a column in the test data, excluding rows where there is no monitor data output. The feature
 importances from random forest or XGBoost are saved when those methods are used.
 """
@@ -14,7 +14,7 @@ import sklearn.ensemble
 import sklearn.metrics
 import sys
 import xgboost as xgb
-# these are imported functions created for this package that split datasets (see data_split_tune_utils.py)
+# this is an imported functions created for this package that splits datasets (see data_split_tune_utils.py)
 from data_split_tune_utils import X_y_site_split
 
 models = ["ridge", "rf", "xgb"]

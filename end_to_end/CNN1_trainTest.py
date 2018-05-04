@@ -1,3 +1,7 @@
+"""Description: This script allows the user to train CNN1 from CNN_architecture.py
+on the full, imputed train set and evaluate the fitted model on the imputed test set using R^2. The predictions on the 
+test set are saved in a csv as a column in the test data, excluding rows where there is no monitor data output.
+"""
 import pandas as pd
 import numpy as np
 import torch
@@ -5,14 +9,19 @@ import pickle
 from torch.autograd import Variable
 import sklearn.preprocessing
 import sklearn.metrics
+# this imported function was created for this package to split datasets (see data_split_tune_utils.py)
 from data_split_tune_utils import X_y_site_split
+# these imported functions were created for this package for the purposes of data pre-processing for CNNs, training CNNs, 
+# and evaluation of CNNs (see CNN_utils.py)
 from CNN_utils import split_sizes_site, split_data, pad_stack_splits, get_monitorData_indices, r2, get_nonConst_vars, train_CNN
+# this is an imported class that is one of our CNN architectures (see CNN_architecture.py)
 from CNN_architecture import CNN1
 
+# set seeds for reproducibility
 np.random.seed(1)
 torch.manual_seed(1)
 
-### read in train, val, and test
+# read in train, val, and test
 train = pd.read_csv('../data/trainV_ridgeImp.csv')
 val = pd.read_csv('../data/valV_ridgeImp.csv')
 test = pd.read_csv('../data/testV_ridgeImp.csv')
@@ -29,54 +38,55 @@ test_sites_all_nan_df = pd.DataFrame(np.isnan(test.groupby('site').sum()['Monito
 test_sites_to_delete = list(test_sites_all_nan_df[test_sites_all_nan_df['MonitorData'] == True].index)
 test = test[~test['site'].isin(test_sites_to_delete)]
 
-### split train, val, and test into x, y, and sites
+# split train, test into x, y, and sites
 train_x, train_y, train_sites = X_y_site_split(train, y_var_name='MonitorData', site_var_name='site')
 test_x, test_y, test_sites = X_y_site_split(test, y_var_name='MonitorData', site_var_name='site')
 
-### get dataframes with non-constant features only
+# get dataframes with non-constant features only
 nonConst_vars = get_nonConst_vars(train, site_var_name='site', y_var_name='MonitorData', cutoff=1000)
 train_x_nonConst = train_x.loc[:, nonConst_vars]
 test_x_nonConst = test_x.loc[:, nonConst_vars]
 
-### standardize all features
+# standardize all features
 standardizer_all = sklearn.preprocessing.StandardScaler(with_mean = True, with_std = True)
 train_x_std_all = standardizer_all.fit_transform(train_x)
 test_x_std_all = standardizer_all.transform(test_x)
 
-### standardize non-constant features
+# standardize non-constant features
 standardizer_nonConst = sklearn.preprocessing.StandardScaler(with_mean = True, with_std = True)
 train_x_std_nonConst = standardizer_nonConst.fit_transform(train_x_nonConst)
 test_x_std_nonConst = standardizer_nonConst.transform(test_x_nonConst)
 
 
 
-
-### get split sizes for TRAIN data (splitting by site)
+# get split sizes for TRAIN data (splitting by site)
 train_split_sizes = split_sizes_site(train_sites.values)
 
-### get tuples by site
+# get tuples by site
 train_x_std_tuple_nonConst = split_data(torch.from_numpy(train_x_std_nonConst).float(), train_split_sizes, dim = 0)
 train_x_std_tuple = split_data(torch.from_numpy(train_x_std_all).float(), train_split_sizes, dim = 0)
 train_y_tuple = split_data(torch.from_numpy(train_y.values), train_split_sizes, dim = 0)
 
-### get site sequences stacked into matrix to go through CNN
+# get site sequences stacked into matrix to go through CNN
 train_x_std_stack_nonConst = pad_stack_splits(train_x_std_tuple_nonConst, np.array(train_split_sizes), 'x')
 train_x_std_stack_nonConst = Variable(torch.transpose(train_x_std_stack_nonConst, 1, 2))
 
 
-### get split sizes for TEST data (splitting by site)
+# get split sizes for TEST data (splitting by site)
 test_split_sizes = split_sizes_site(test_sites.values)
 
-### get tuples by site
+# get tuples by site
 test_x_std_tuple_nonConst = split_data(torch.from_numpy(test_x_std_nonConst).float(), test_split_sizes, dim = 0)
 test_x_std_tuple = split_data(torch.from_numpy(test_x_std_all).float(), test_split_sizes, dim = 0)
 test_y_tuple = split_data(torch.from_numpy(test_y.values), test_split_sizes, dim = 0)
 
-### get site sequences stacked into matrix to go through CNN
+# get site sequences stacked into matrix to go through CNN
 test_x_std_stack_nonConst = pad_stack_splits(test_x_std_tuple_nonConst, np.array(test_split_sizes), 'x')
 test_x_std_stack_nonConst = Variable(torch.transpose(test_x_std_stack_nonConst, 1, 2))
 
 
+
+# training parameters and model input sizes
 num_epochs = 100
 batch_size = 128
 input_size_conv = train_x_std_nonConst.shape[1]
@@ -115,9 +125,10 @@ print('Learning rate: ' + str(lr))
 print('Weight decay: ' + str(weight_decay))
 print()
 
+# train
 train_CNN(train_x_std_stack_nonConst, train_x_std_tuple, train_y_tuple, cnn, optimizer, mse_loss, num_epochs, batch_size)
 
-train_r2 = r2(cnn, batch_size, train_x_std_stack_nonConst, train_x_std_tuple, train_y_tuple, get_pred=False)
+# evaluate
 test_r2, test_pred_cnn = r2(cnn, batch_size, test_x_std_stack_nonConst, test_x_std_tuple, test_y_tuple, get_pred=True)
 
 print()

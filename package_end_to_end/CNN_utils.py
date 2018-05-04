@@ -47,7 +47,7 @@ def split_data(data, split_sizes, dim=0):
         - data (torch.Tensor): Dataset to split into blocks
         - split_sizes (list of int): Sizes of blocks; sum of the sizes cannot exceed the length of the tensor
         along the dimension that it is being split
-        - dim (int): Dimension along which to split data
+        - dim (int): Dimension along which to split data; default is 0
     -----------
     Outputs:
         - (tuple of torch.Tensor): Desired blocks of dataset contained within a tuple
@@ -124,7 +124,8 @@ def get_nonConst_vars(data, site_var_name='site', y_var_name='MonitorData', cuto
         - data (pandas.DataFrame): For checking if variables are non-constant
         - site_var_name (str): Column name for monitor site
         - y_var_name (str): Column name for monitor output
-        - cutoff (int): Number of unique values a variable needs to have to be considered non-constant
+        - cutoff (int): Number of unique values a variable within a sensor sequence needs to have
+        to be considered non-constant; default is 1000
     -----------
     Outputs:
         - nonConst_colNames (list): Names of non-constant variables
