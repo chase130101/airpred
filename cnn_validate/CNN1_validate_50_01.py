@@ -1,5 +1,4 @@
 import pandas as pd
-import pandas as pd
 import numpy as np
 import torch
 from torch.autograd import Variable
@@ -7,7 +6,7 @@ import sklearn.preprocessing
 import sklearn.metrics
 from data_split_tune_utils import X_y_site_split
 from CNN_utils import split_sizes_site, split_data, pad_stack_splits, get_monitorData_indices, r2, get_nonConst_vars, train_CNN
-from CNN_architecture import CNN2
+from CNN_architecture import CNN1
 
 np.random.seed(1)
 torch.manual_seed(1)
@@ -85,10 +84,10 @@ print()
 hidden_size_conv_list = [25, 50]
 kernel_size_list = [3, 5]
 padding_list = [1, 2]
-hidden_size_full_list = [50, 100]
-dropout_full_list = [0.1, 0.4]
-hidden_size2_full_list = [50, 100]
-dropout2_full_list = [0.1, 0.4]
+hidden_size_full_list = [50]
+dropout_full_list = [0.1]
+hidden_size_combo_list = [50]
+dropout_combo_list = [0.1]
 lr_list = [0.1]
 weight_decay_list = [0.00001]
 
@@ -101,14 +100,14 @@ for hidden_size_conv in hidden_size_conv_list:
     for kernel_size, padding in zip(kernel_size_list, padding_list):
         for hidden_size_full in hidden_size_full_list:
             for dropout_full in dropout_full_list:
-                for hidden_size2_full in hidden_size2_full_list:
-                    for dropout2_full in dropout2_full_list:
+                for hidden_size_combo in hidden_size_combo_list:
+                    for dropout_combo in dropout_combo_list:
                         for lr in lr_list:
                             for weight_decay in weight_decay_list:
                                 
                                 # instantiate CNN
-                                cnn = CNN2(input_size_conv, hidden_size_conv, kernel_size, padding, input_size_full, hidden_size_full, 
-                                          dropout_full, hidden_size2_full, dropout2_full)
+                                cnn = CNN1(input_size_conv, hidden_size_conv, kernel_size, padding, input_size_full, hidden_size_full, 
+                                          dropout_full, hidden_size_combo, dropout_combo)
                                 
                                 # instantiate optimizer
                                 optimizer = torch.optim.Adam(cnn.parameters(), lr=lr, weight_decay=weight_decay)
@@ -117,8 +116,8 @@ for hidden_size_conv in hidden_size_conv_list:
                                 print('Kernel size: ' + str(kernel_size))
                                 print('Hidden size full: ' + str(hidden_size_full))
                                 print('Dropout full: ' + str(dropout_full))
-                                print('Hidden size 2 full: ' + str(hidden_size2_full))
-                                print('Dropout 2 full: ' + str(dropout2_full))
+                                print('Hidden size combo: ' + str(hidden_size_combo))
+                                print('Dropout combo: ' + str(dropout_combo))
                                 print('Learning rate: ' + str(lr))
                                 print('Weight decay: ' + str(weight_decay))
 
@@ -135,8 +134,8 @@ for hidden_size_conv in hidden_size_conv_list:
                                     best_kernel_size = kernel_size
                                     best_hidden_size_full = hidden_size_full
                                     best_dropout_full = dropout_full
-                                    best_hidden_size2_full = hidden_size2_full
-                                    best_dropout2_full = dropout2_full
+                                    best_hidden_size_combo = hidden_size_combo
+                                    best_dropout_combo = dropout_combo
                                     best_lr = lr
                                     best_weight_decay = weight_decay
                                     
@@ -145,7 +144,7 @@ print('Best hidden size conv: ' + str(best_hidden_size_conv))
 print('Best kernel size: ' + str(best_kernel_size))
 print('Best hidden size full: ' + str(best_hidden_size_full))
 print('Best dropout full: ' + str(best_dropout_full))
-print('Best hidden size 2 full: ' + str(best_hidden_size2_full))
-print('Best dropout 2 full: ' + str(best_dropout2_full))
+print('Best hidden size combo: ' + str(best_hidden_size_combo))
+print('Best dropout combo: ' + str(best_dropout_combo))
 print('Best learning rate: ' + str(best_lr))
-print('Best weight decay: ' + str(best_weight_decay))                    
+print('Best weight decay: ' + str(best_weight_decay))
