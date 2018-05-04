@@ -24,6 +24,10 @@ parser.add_argument("model",
     help = "Specify which model to evaluate via cross-validation. " +\
     "Options are Ridge (\"ridge\"), Random Forest (\"rf\"), and XGBoost (\"xgb\").")
 
+parser.add_argument("n_folds", 
+    help = "Specify how many cross-validation folds to include.",
+    type=int,
+    default=4)
 
 parser.add_argument("dataset",
     help = "Specify which dataset to use. " + \
@@ -40,6 +44,9 @@ if args.dataset not in datasets:
     print("Invalid dataset!")
     sys.exit()
 
+if args.n_folds < 1:
+    print("n_folds must be at least 1!")
+    sys.exit()
 
 train = None
 
@@ -72,7 +79,7 @@ if args.model == "ridge":
     parameter_grid_ridge = {"alpha" : [0.1, 0.01, 0.001, 0.0001, 0.00001]}
     
     # run cross-validation
-    cv_r2, best_hyperparams = cross_validation(data=train, model=ridge, hyperparam_dict=parameter_grid_ridge, num_folds=4, y_var_name="MonitorData", site_var_name="site")
+    cv_r2, best_hyperparams = cross_validation(data=train, model=ridge, hyperparam_dict=parameter_grid_ridge, num_folds=args.n_folds, y_var_name="MonitorData", site_var_name="site")
     print("Cross-validation R^2: " + str(cv_r2))
     print("Best hyper-parameters: " + str(best_hyperparams))
     
@@ -87,7 +94,7 @@ elif args.model == "rf":
     parameter_grid_rf = {"max_features" : [10, 15, 20, 25]}
     
     # run cross-validation
-    cv_r2, best_hyperparams = cross_validation(data=train, model=rf, hyperparam_dict=parameter_grid_rf, num_folds=4, y_var_name="MonitorData", site_var_name="site")
+    cv_r2, best_hyperparams = cross_validation(data=train, model=rf, hyperparam_dict=parameter_grid_rf, num_folds=args.n_folds, y_var_name="MonitorData", site_var_name="site")
     print("Cross-validation R^2: " + str(cv_r2))
     print("Best hyper-parameters: " + str(best_hyperparams))
     
