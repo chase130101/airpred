@@ -15,7 +15,6 @@ from sklearn.preprocessing import Imputer
 from sklearn.utils.validation import check_array, check_is_fitted, check_X_y
 from sklearn.metrics import r2_score
 
-### Inspired by MissForest imputation method
 class PredictiveImputer(BaseEstimator, TransformerMixin):
     """Allows the user to fit data imputation models and return imputed data matrices
     - Inspired by MissForest data imputation algorithm

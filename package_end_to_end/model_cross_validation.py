@@ -1,3 +1,5 @@
+
+
 import argparse
 import configparser
 import numpy as np
@@ -8,7 +10,8 @@ import sklearn.ensemble
 import sklearn.metrics
 import sys
 import xgboost as xgb
-
+# these are imported functions created for this package that involve splitting datasets or performing cross-validation 
+# see data_split_tune_utils.py
 from data_split_tune_utils import cross_validation_splits, X_y_site_split, cross_validation
 
 models = ["ridge", "rf", "xgb"]

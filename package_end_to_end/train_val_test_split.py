@@ -1,8 +1,12 @@
+"""Description: This script splits a dataset into either train/test sets or train/validation/test sets
+and saves the new, separated datasets as csv files. The data splits will be such that site-days for the
+same site do not get split up.
+"""
 import argparse
 import numpy as np
 import pandas as pd
 import sys
-
+# these are imported functions created for this package that split datasets (see data_split_tune_utils.py)
 from data_split_tune_utils import train_test_split, train_val_test_split
 
 config = configparser.RawConfigParser()
@@ -61,14 +65,14 @@ data = pd.read_csv(config["data"]["data_to_impute"])
 # set seed for reproducibility
 np.random.seed(1)
 
-if args.val: # split data into train, validation, and test sets
+if args.val: # split data into train, validation, and test sets and save
     train, val, test = train_val_test_split(data, train_prop=args.train_split, test_prop=test_split, site_var_name="site")
     train.to_csv(config["data"]["trainV"], index=False)
     val.to_csv(  config["data"]["valV"], index=False)
     test.to_csv( config["data"]["testV"], index=False)
 
 
-else: # split data into train and test sets
+else: # split data into train and test sets and save
     train, test = train_test_split(data, train_prop=args.train_split, site_var_name="site")
     train.to_csv(config["data"]["train"], index=False)
     test.to_csv(config["data"]["test"], index=False)
