@@ -85,10 +85,10 @@ print()
 hidden_size_conv_list = [25, 50]
 kernel_size_list = [3, 5]
 padding_list = [1, 2]
-hidden_size_full_list = [50, 100]
-dropout_full_list = [0.1, 0.4]
-hidden_size2_full_list = [50, 100]
-dropout2_full_list = [0.1, 0.4]
+hidden_size_full_list = [50]
+dropout_full_list = [0.1]
+hidden_size2_full_list = [50]
+dropout2_full_list = [0.1]
 lr_list = [0.1]
 weight_decay_list = [0.00001]
 
@@ -148,4 +148,4 @@ print('Best dropout full: ' + str(best_dropout_full))
 print('Best hidden size 2 full: ' + str(best_hidden_size2_full))
 print('Best dropout 2 full: ' + str(best_dropout2_full))
 print('Best learning rate: ' + str(best_lr))
-print('Best weight decay: ' + str(best_weight_decay))                    
+print('Best weight decay: ' + str(best_weight_decay))
