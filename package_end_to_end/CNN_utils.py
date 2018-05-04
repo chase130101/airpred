@@ -286,7 +286,6 @@ def train_CNN(x_stack_nonConst, x_tuple, y_tuple, cnn, optimizer, loss, num_epoc
             
         if (epoch+1) % 10 == 0:
             print('Epoch loss after epoch ' + str(epoch+1) + ': ' + str(epoch_loss))
-            print('Train R^2 after epoch ' + str(epoch+1) + ': ' + str(r2(cnn, batch_size, x_stack_nonConst, x_tuple, y_tuple, get_pred=False)))
             print()
     
     return None

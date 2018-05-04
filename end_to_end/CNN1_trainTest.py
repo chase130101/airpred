@@ -121,7 +121,6 @@ train_r2 = r2(cnn, batch_size, train_x_std_stack_nonConst, train_x_std_tuple, tr
 test_r2, test_pred_cnn = r2(cnn, batch_size, test_x_std_stack_nonConst, test_x_std_tuple, test_y_tuple, get_pred=True)
 
 print()
-print('Train R^2: ' + str(train_r2))
 print('Test R^2: ' + str(test_r2))
 
 # put model predictions into test dataframe (note that these predictions do not include those for rows where there is no response value)

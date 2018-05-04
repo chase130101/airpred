@@ -73,7 +73,7 @@ val_x_std_stack_nonConst = Variable(torch.transpose(val_x_std_stack_nonConst, 1,
 
 
 
-num_epochs = 11
+num_epochs = 16
 batch_size = 128
 input_size_conv = train_x_std_nonConst.shape[1]
 input_size_full = train_x_std_all.shape[1]
