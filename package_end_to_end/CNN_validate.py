@@ -35,11 +35,11 @@ args = parser.parse_args()
 np.random.seed(1)
 torch.manual_seed(1)
 
-### read in train and val sets
+# read in train and val sets
 train = pd.read_csv(config["Ridge_Imputation"]["train"])
 val = pd.read_csv(config["Ridge_Imputation"]["val"])
 
-### delete sites from datasets where all monitor outputs are NaN
+### delete sites from datasets where all monitor outputs are nan
 train_sites_all_nan_df = pd.DataFrame(np.isnan(train.groupby('site').sum()['MonitorData']))
 train_sites_to_delete = list(train_sites_all_nan_df[train_sites_all_nan_df['MonitorData'] == True].index)
 train = train[~train['site'].isin(train_sites_to_delete)]
@@ -105,7 +105,7 @@ print('Total number of variables: ' + str(input_size_full))
 print('Total number of non-constant variables: ' + str(input_size_conv))
 print()
 
-# tune CNN1
+### tune CNN1
 if args.cnn_type == "cnn_1":
     # CNN and optimizer hyper-parameters to test
     hidden_size_conv_list = [25, 50]
@@ -180,7 +180,7 @@ if args.cnn_type == "cnn_1":
     print('Best weight decay: ' + str(best_weight_decay))
 
 
-# tune CNN2
+### tune CNN2
 else:
     hidden_size_conv_list = [25, 50]
     kernel_size_list = [3, 5]

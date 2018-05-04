@@ -46,7 +46,7 @@ test  = pd.read_csv(config["RidgeImputation"]["test"])
 # combine train and validation sets into train set
 train = pd.concat([train, val], axis=0, ignore_index=True)
 
-### delete sites from datasets where all monitor outputs are NaN
+### delete sites from datasets where all monitor outputs are nan
 train_sites_all_nan_df = pd.DataFrame(np.isnan(train.groupby('site').sum()['MonitorData']))
 train_sites_to_delete = list(train_sites_all_nan_df[train_sites_all_nan_df['MonitorData'] == True].index)
 train = train[~train['site'].isin(train_sites_to_delete)]
