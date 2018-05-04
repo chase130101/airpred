@@ -1,0 +1,38 @@
+Total number of variables: 62
+Total number of non-constant variables: 22
+Hidden size conv: 25
+Kernel size: 3
+Hidden size full: 50
+Dropout full: 0.1
+Hidden size combo: 50
+Dropout combo: 0.1
+Learning rate: 0.1
+Weight decay: 1e-05
+
+Epoch loss after epoch 5: 176.9603681564331
+Train R^2 after epoch 5: 0.701834695358
+
+Epoch loss after epoch 10: 166.9604253768921
+Train R^2 after epoch 10: 0.688647242505
+
+Epoch loss after epoch 15: 172.03864288330078
+Train R^2 after epoch 15: 0.706494833057
+
+Epoch loss after epoch 20: 166.70654964447021
+Train R^2 after epoch 20: 0.711321074895
+
+Epoch loss after epoch 25: 159.2389669418335
+Train R^2 after epoch 25: 0.710039191486
+
+Epoch loss after epoch 30: 157.73589038848877
+Train R^2 after epoch 30: 0.71622830263
+
+Epoch loss after epoch 35: 159.09384441375732
+Train R^2 after epoch 35: 0.715425693515
+
+Epoch loss after epoch 40: 157.47970390319824
+Train R^2 after epoch 40: 0.72234476946
+
+
+Train R^2: 0.709864490943
+Test R^2: 0.751729464668
