@@ -1,7 +1,18 @@
+"""Description: This script fits random forest regression models for imputing missing data on a 
+proportion of the training data that is specified by the user using the MissForest algorithm
+(see PredictiveImputer in predictiveImputer_mod.py for more details). The fitted imputer is NOT saved 
+due to the memory that saving requires.
+
+The script then imputes the missing data in either the train/test sets using the fitted random forest
+regression imputer and evaluates the random forest imputation models using R^2. The imputed datasets 
+are saved along with the imputation model evaluations.
+"""
 import pandas as pd
 import numpy as np
 import pickle
+# these are imported functions created for this package that split datasets (see data_split_tune_utils.py)
 from data_split_tune_utils import train_test_split, X_y_site_split
+# this is the PredictiveImputer class inspired by the MissForest algorithm (see predictiveImputer_mod.py)
 from predictiveImputer_mod import PredictiveImputer
 
 np.random.seed(1)

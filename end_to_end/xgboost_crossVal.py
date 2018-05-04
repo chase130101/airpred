@@ -1,10 +1,17 @@
+"""Description: This script allows the user to perform cross-validation to tune
+an XGBoost model using imputed training data. The dictionary of best 
+hyper-parameters from cross-validation will be saved.
+"""
 import pandas as pd
 import numpy as np
 import xgboost as xgb
 import sklearn.metrics
 import pickle
+# these are imported functions created for this package that involve splitting datasets or performing cross-validation 
+# see data_split_tune_utils.py
 from data_split_tune_utils import cross_validation_splits, X_y_site_split, cross_validation
 
+# set seed for reproducibility
 np.random.seed(1)
 
 train = pd.read_csv('../data/train_ridgeImp.csv')

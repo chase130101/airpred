@@ -1,2 +1,0 @@
-Cross-validation R^2: 0.788038174628
-Best hyper-parameters: {'learning_rate': 0.05, 'max_depth': 5, 'n_estimators': 500}

@@ -1,5 +1,7 @@
-
-
+"""Description: This script allows the user to perform cross-validation to tune
+a ridge regression, random forest, or XGBoost model using imputed training data. 
+The dictionary of best hyper-parameters from cross-validation will be saved.
+"""
 import argparse
 import configparser
 import numpy as np

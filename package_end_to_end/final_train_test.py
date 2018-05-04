@@ -1,3 +1,9 @@
+"""Description: This script allows the user to train either a ridge regression, random forest,
+or XGBoost model on the full, imputed train set using the best hyper-parameters from cross-validation 
+and evaluate the fitted model on the test set using R^2. The predictions on the test set are saved 
+in a csv as a column in the test data, excluding rows where there is no monitor data output. The feature
+importances from random forest or XGBoost are saved when those methods are used.
+"""
 import argparse
 import configparser
 import numpy as np
@@ -8,8 +14,8 @@ import sklearn.ensemble
 import sklearn.metrics
 import sys
 import xgboost as xgb
-
-from data_split_tune_utils import cross_validation_splits, X_y_site_split, cross_validation
+# these are imported functions created for this package that split datasets (see data_split_tune_utils.py)
+from data_split_tune_utils import X_y_site_split
 
 models = ["ridge", "rf", "xgb"]
 datasets = ["ridgeImp", "rfImp"]
@@ -121,7 +127,7 @@ elif args.model == "rf":
     # create dataframe of random forest feature importances and save
     feature_importance_df = pd.DataFrame(rf.feature_importances_.reshape(len(rf.feature_importances_), -1), columns=["RF_Feature_Importance"])
     feature_importance_df["Variable"] = pd.Series(train_x.columns, index=feature_importance_df.index)
-    feature_importance_df.to_csv(config["Regression"]["rf_fti"], index=False)                                      
+    feature_importance_df.to_csv(config["Regression"]["rf_ftImp"], index=False)                                      
 
 elif args.model == "xgb":
     # load dictionary with best xgboost hyper-parameters from cross-validation
@@ -149,4 +155,4 @@ elif args.model == "xgb":
     # create dataframe of xgboost feature importances and save
     feature_importance_df = pd.DataFrame(xgboost.feature_importances_.reshape(len(xgboost.feature_importances_), -1), columns=["XGBoost_Feature_Importance"])
     feature_importance_df["Variable"] = pd.Series(train_x.columns, index=feature_importance_df.index)
-    feature_importance_df.to_csv(config["Regression"]["xgb_fti"], index=False)
+    feature_importance_df.to_csv(config["Regression"]["xgb_ftImp"], index=False)

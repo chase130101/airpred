@@ -1,6 +1,11 @@
+"""Description: This script imputes the missing data in train/test sets using
+a fitted ridge regression imputer and evaluates the ridge imputation models using R^2.
+The imputed datasets are saved along with the imputation model evaluations.
+"""
 import numpy as np
 import pandas as pd
 import pickle
+# this imported function was created for this package to split datasets (see data_split_tune_utils.py)
 from data_split_tune_utils import X_y_site_split
 
 train = pd.read_csv('../data/train.csv')
