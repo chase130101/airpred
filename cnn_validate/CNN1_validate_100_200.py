@@ -81,13 +81,13 @@ print('Total number of non-constant variables: ' + str(input_size_conv))
 print()
 
 # CNN and optimizer hyper-parameters to test
-hidden_size_conv_list = [25, 50]
+hidden_size_conv_list = [75, 100]
 kernel_size_list = [3, 5]
 padding_list = [1, 2]
-hidden_size_full_list = [100]
-dropout_full_list = [0.4]
-hidden_size_combo_list = [100]
-dropout_combo_list = [0.4]
+hidden_size_full_list = [200]
+dropout_full_list = [0.1]
+hidden_size_combo_list = [200]
+dropout_combo_list = [0.1]
 lr_list = [0.1]
 weight_decay_list = [0.00001]
 
