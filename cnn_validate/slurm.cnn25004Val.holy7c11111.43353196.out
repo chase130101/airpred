@@ -1,0 +1,88 @@
+Total number of variables: 62
+Total number of non-constant variables: 22
+
+Hidden size conv: 25
+Kernel size: 3
+Hidden size full: 50
+Dropout full: 0.4
+Hidden size 2 full: 50
+Dropout 2 full: 0.4
+Learning rate: 0.1
+Weight decay: 1e-05
+Epoch loss after epoch 5: 161.90468978881836
+
+Epoch loss after epoch 10: 152.02073764801025
+
+Epoch loss after epoch 15: 145.23241233825684
+
+Epoch loss after epoch 20: 147.99742889404297
+
+Validation R^2: 0.744115197765
+
+
+Hidden size conv: 25
+Kernel size: 5
+Hidden size full: 50
+Dropout full: 0.4
+Hidden size 2 full: 50
+Dropout 2 full: 0.4
+Learning rate: 0.1
+Weight decay: 1e-05
+Epoch loss after epoch 5: 162.385329246521
+
+Epoch loss after epoch 10: 154.63222980499268
+
+Epoch loss after epoch 15: 148.76470565795898
+
+Epoch loss after epoch 20: 148.23273754119873
+
+Validation R^2: 0.750538035107
+
+
+Hidden size conv: 50
+Kernel size: 3
+Hidden size full: 50
+Dropout full: 0.4
+Hidden size 2 full: 50
+Dropout 2 full: 0.4
+Learning rate: 0.1
+Weight decay: 1e-05
+Epoch loss after epoch 5: 165.31954669952393
+
+Epoch loss after epoch 10: 157.238844871521
+
+Epoch loss after epoch 15: 153.68286037445068
+
+Epoch loss after epoch 20: 149.2565679550171
+
+Validation R^2: 0.74909102273
+
+
+Hidden size conv: 50
+Kernel size: 5
+Hidden size full: 50
+Dropout full: 0.4
+Hidden size 2 full: 50
+Dropout 2 full: 0.4
+Learning rate: 0.1
+Weight decay: 1e-05
+Epoch loss after epoch 5: 163.29046440124512
+
+Epoch loss after epoch 10: 152.8592405319214
+
+Epoch loss after epoch 15: 150.0732183456421
+
+Epoch loss after epoch 20: 143.5336389541626
+
+Validation R^2: 0.7510737968
+
+
+Best validation R^2: 0.7510737968
+Best hidden size conv: 50
+Best kernel size: 5
+Best hidden size full: 50
+Best dropout full: 0.4
+Best hidden size 2 full: 50
+Best dropout 2 full: 0.4
+Best learning rate: 0.1
+Best weight decay: 1e-05
