@@ -1,7 +1,9 @@
 """Description: This script imputes the missing data in either the train/test sets
 or train/validation/test sets using a fitted ridge regression imputer and evaluates
 the ridge imputation models. The imputed datasets are saved along with the imputation
-model evaluations.
+model evaluations. Included in the model evaluations is a weighted R^2, which is weighted 
+average of the R^2 associated with each imputed variable where the weights are based on 
+amount of missingness.
 """
 import argparse
 import configparser
