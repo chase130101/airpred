@@ -27,7 +27,7 @@ class PredictiveImputer(BaseEstimator, TransformerMixin):
         data matrix used when fitting the data imputation models
     -----------
     Attributes user can specify when instantiating class:
-        - max_iter(int): Maximium number of iterations to run MissForest algorithm for; default is 10
+        - max_iter (int): Maximium number of iterations to run MissForest algorithm for; default is 10
         - initial_strategy (str): Must be one of 'mean' or 'median'; how to impute data matrices prior
         to the first iteration of the MissForest algorithm; default is 'mean'
         - f_model (str): Must be one of 'Ridge' or 'RandomForest'; modeling method to use for data imputation;
