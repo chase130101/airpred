@@ -16,9 +16,6 @@ import xgboost as xgb
 # see data_split_tune_utils.py
 from data_split_tune_utils import cross_validation_splits, X_y_site_split, cross_validation
 
-models = ["ridge", "rf", "xgb"]
-datasets = ["ridgeImp", "rfImp"]
-
 
 config = configparser.RawConfigParser()
 config.read("config/py_config.ini")
@@ -27,7 +24,8 @@ config.read("config/py_config.ini")
 parser = argparse.ArgumentParser()
 parser.add_argument("model", 
     help = "Specify which model to evaluate via cross-validation. " +\
-    "Options are Ridge (\"ridge\"), Random Forest (\"rf\"), and XGBoost (\"xgb\").")
+    "Options are Ridge (\"ridge\"), Random Forest (\"rf\"), and XGBoost (\"xgb\").",
+    choices=["ridge", "rf", "xgb"])
 
 parser.add_argument("n_folds", 
     help = "Specify how many cross-validation folds to include.",
@@ -35,19 +33,11 @@ parser.add_argument("n_folds",
     default=4)
 
 parser.add_argument("dataset",
-    help = "Specify which dataset to use. " + \
-    "Options are ridge-imputed (\"ridgeImp\") and random-forest imputed (\"rfImp\").") 
-
+    help = "Specify which imputed dataset to use. " + \
+    "Options are ridge-imputed (\"ridgeImp\") and random-forest imputed (\"rfImp\").",
+    choices=["ridgeImp", "rfImp"]) 
+    
 args = parser.parse_args()
-
-if args.model not in models:
-    print("Invalid regression model!")
-    sys.exit()
-
-
-if args.dataset not in datasets:
-    print("Invalid dataset!")
-    sys.exit()
 
 if args.n_folds < 1:
     print("n_folds must be at least 1!")

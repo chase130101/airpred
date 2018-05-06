@@ -26,8 +26,13 @@ parser = argparse.ArgumentParser()
 parser.add_argument("cnn_type", 
     help = "Specify which of the two CNN architectures to use. The options are \"cnn_1\" and \"cnn_2\".",
     type=int,
-    choices = ["cnn_1", "cnn_2"]
-    default=4)
+    choices = ["cnn_1", "cnn_2"])
+
+parser.add_argument("dataset",
+    help = "Specify which imputed dataset to use. " + \
+    "Options are ridge-imputed (\"ridgeImp\") and random-forest imputed (\"rfImp\").",
+    choices=["ridgeImp", "rfImp"]) 
+
 
 args = parser.parse_args()
 
@@ -35,9 +40,19 @@ args = parser.parse_args()
 np.random.seed(1)
 torch.manual_seed(1)
 
-# read in train and val sets
-train = pd.read_csv(config["Ridge_Imputation"]["train"])
-val = pd.read_csv(config["Ridge_Imputation"]["val"])
+train = None
+val = None
+
+if args.dataset == "ridgeImp":
+    # read in train and val sets
+    train = pd.read_csv(config["Ridge_Imputation"]["trainV"])
+    val = pd.read_csv(config["Ridge_Imputation"]["valV"])
+
+elif args.dataset == "rfImp":
+    # read in train and val sets
+    train = pd.read_csv(config["RF_Imputation"]["trainV"])
+    val = pd.read_csv(config["RF_Imputation"]["valV"])
+
 
 ### delete sites from datasets where all monitor outputs are nan
 train_sites_all_nan_df = pd.DataFrame(np.isnan(train.groupby('site').sum()['MonitorData']))
