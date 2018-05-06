@@ -1,9 +1,14 @@
+"""Description: This script imputes the missing data in either the train/test sets
+or train/validation/test sets using a fitted ridge regression imputer and evaluates
+the ridge imputation models. The imputed datasets are saved along with the imputation
+model evaluations.
+"""
 import argparse
 import configparser
 import pandas as pd
 import numpy as np
 import pickle
-
+# this imported function was created for this package to split datasets (see data_split_tune_utils.py)
 from data_split_tune_utils import X_y_site_split
 
 parser = argparse.ArgumentParser()

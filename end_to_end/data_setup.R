@@ -1,8 +1,17 @@
+## Description: This is a script that is used to combine the raw data with 
+## the sensor locations and census data. This script also removes features that
+## are not needed for modeling and engineers various features that may be useful
+## in predicting PM2.5. The output of this script is the fully pre-processed data
+## in csv format that is ready to be imputed.
+
+
 #Load packages
-require(data.table)
+require(data.table) #used for fread and fwrite
 require(dplyr)
 
 #Read data
+#Data can be in .csv or .rds format
+
 #pollution_data = fread('../data/assembled_data.csv')
 pollution_data = readRDS('../data/assembled_data.rds')
 location_census_data = fread('../data/sensor_locations_with_census.csv')
@@ -61,12 +70,15 @@ full_data$month = as.numeric(format(full_data$date,'%m'))
 #Redefine year as number of years from starting point
 full_data$year = full_data$year - min(full_data$year)
 
-#Engineer other date features
+#Create cumulative month feature
 full_data$cumulative_month = full_data$year*12 + full_data$month 
+
+#Other date features can be created as well if desired
 #full_data$day_of_year = as.numeric(format(full_data$date,'%d')) + 30*(full_data$month-1)
 #full_data$cumulative_day =  365*(full_data$year) + full_data$day_of_year
 
-#https://ianlondon.github.io/blog/encoding-cyclical-features-24hour-time/
+#Create month feature designed to take into consideration the periodic nature of months
+#See https://ianlondon.github.io/blog/encoding-cyclical-features-24hour-time/ for more details
 full_data = full_data %>% mutate(sin_time = round(sin(2*pi*month/12), 8),
                                  cos_time = round(cos(2*pi*month/12), 8))
 

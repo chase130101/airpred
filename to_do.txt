@@ -1,9 +1,8 @@
 Still to do:
-- Installation scripts and instructions (Justin)
-- Consolidate code (Chris/Justin)
-- Get results for CNN (Chris)
-- Add code comments (Chris)
-- Other code documentation (everyone)
-- EDA, justification of variable decisions, poster outline (Keyan)
-- Try GP as first pass modeling approach (Casey)
-- Compile results to create poster/website (everyone)
+- Installation scripts and script usage instructions (detailed README)
+- Get results for CNN
+- Add code comments and descriptions
+- Create poster/website
+- Create Jupyter notebook tutorial
+- Test code pipeline
+- Create final presentation slides

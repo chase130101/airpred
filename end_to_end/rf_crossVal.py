@@ -1,8 +1,14 @@
+"""Description: This script allows the user to perform cross-validation to tune
+a random forest regression model using imputed training data. The dictionary of best 
+hyper-parameters from cross-validation will be saved.
+"""
 import pandas as pd
 import numpy as np
 import sklearn.ensemble
 import sklearn.metrics
 import pickle
+# these are imported functions created for this package that involve splitting datasets or performing cross-validation 
+# see data_split_tune_utils.py
 from data_split_tune_utils import cross_validation_splits, X_y_site_split, cross_validation
 
 np.random.seed(1)

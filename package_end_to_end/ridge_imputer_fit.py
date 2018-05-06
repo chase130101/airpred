@@ -1,10 +1,16 @@
+"""Description: This script fits ridge regression models for imputing missing data on a 
+proportion of the training data that is specified by the user using the MissForest algorithm
+(see PredictiveImputer in predictiveImputer_mod.py for more details). The fitted imputer is saved 
+and can be used to impute other datasets (e.g., the test set).
+"""
 import argparse
 import configparser
 import pandas as pd
 import numpy as np
 import pickle
-
+# these are imported functions created for this package that split datasets (see data_split_tune_utils.py)
 from data_split_tune_utils import train_test_split, X_y_site_split
+# this is the PredictiveImputer class inspired by the MissForest algorithm (see predictiveImputer_mod.py)
 from predictiveImputer_mod import PredictiveImputer
 
 config = configparser.RawConfigParser()
@@ -34,7 +40,7 @@ parser.add_argument("--max_iter",
     default=10)
 
 
-# add optional initial stragegy argument
+# add optional initial strategy argument
 parser.add_argument("--initial_strategy", 
     help="Determines how to impute columns prior to first iteration of method. Default is mean imputation.",
     choices=["mean", "median"],
