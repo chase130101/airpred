@@ -31,6 +31,12 @@ parser.add_argument("cnn_type",
     choices = ["cnn_1", "cnn_2"]
     default=4)
 
+parser.add_argument("dataset",
+    help = "Specify which imputed dataset to use. " + \
+    "Options are ridge-imputed (\"ridgeImp\") and random-forest imputed (\"rfImp\").",
+    choices=["ridgeImp", "rfImp"]) 
+
+
 args = parser.parse_args()
 
 # set seeds for reproducibility
@@ -38,9 +44,19 @@ np.random.seed(1)
 torch.manual_seed(1)
 
 # read in train, val, and test
-train = pd.read_csv(config["RidgeImputation"]["train"])
-val   = pd.read_csv(config["RidgeImputation"]["val"])
-test  = pd.read_csv(config["RidgeImputation"]["test"])
+train, val, test = None, None, None
+
+
+if args.dataset == "ridgeImp":
+    train = pd.read_csv(config["RidgeImputation"]["train"])
+    val   = pd.read_csv(config["RidgeImputation"]["val"])
+    test  = pd.read_csv(config["RidgeImputation"]["test"])
+
+
+elif args.dataset == "rfImp":
+    train = pd.read_csv(config["RF_Imputation"]["train"])
+    val   = pd.read_csv(config["RF_Imputation"]["val"])
+    test  = pd.read_csv(config["RF_Imputation"]["test"])
 
 
 # combine train and validation sets into train set

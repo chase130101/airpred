@@ -20,7 +20,8 @@ parser = argparse.ArgumentParser()
 
 # add optional validation set argument
 parser.add_argument("--val", 
-    help="Create a validation set in addition to train and test sets",
+    help="Use the \"trainV\" dataset (generated via train-test-validation split) as opposed" + \
+         " to the \"train\" dataset (train-test only) to fit",
     action="store_true" )
 
 
@@ -61,7 +62,13 @@ if args.impute_split < 0 or args.impute_split > 1:
     sys.exit()
 
 
-train = pd.read_csv(config["data"]["train"])
+train = None
+if args.val:
+    train = pd.read_csv(config["data"]["trainV"])
+
+else:
+    train = pd.read_csv(config["data"]["train"])
+
 
 # set seed for reproducibility
 np.random.seed(1)
