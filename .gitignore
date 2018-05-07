@@ -45,3 +45,5 @@ data/test_xgboostPred_ridgeImp.csv
 data/xgboost_feature_importances_ridgeImp.csv
 data/test_olsPred_rfImp.csv
 data/sensor_data.csv
+*ridgeImp.pkl
+*rfImp.pkl
