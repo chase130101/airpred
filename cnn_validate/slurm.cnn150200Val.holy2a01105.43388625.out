@@ -1,0 +1,88 @@
+Total number of variables: 62
+Total number of non-constant variables: 22
+
+Hidden size conv: 25
+Kernel size: 3
+Hidden size full: 200
+Dropout full: 0.1
+Hidden size combo: 200
+Dropout combo: 0.1
+Learning rate: 0.1
+Weight decay: 1e-05
+Epoch loss after epoch 5: 150.33092880249023
+
+Epoch loss after epoch 10: 151.76029300689697
+
+Epoch loss after epoch 15: 139.2604742050171
+
+Epoch loss after epoch 20: 143.25036144256592
+
+Validation R^2: 0.757390967492
+
+
+Hidden size conv: 25
+Kernel size: 5
+Hidden size full: 200
+Dropout full: 0.1
+Hidden size combo: 200
+Dropout combo: 0.1
+Learning rate: 0.1
+Weight decay: 1e-05
+Epoch loss after epoch 5: 156.2815284729004
+
+Epoch loss after epoch 10: 143.28150463104248
+
+Epoch loss after epoch 15: 134.57549858093262
+
+Epoch loss after epoch 20: 149.53728008270264
+
+Validation R^2: 0.738452424517
+
+
+Hidden size conv: 50
+Kernel size: 3
+Hidden size full: 200
+Dropout full: 0.1
+Hidden size combo: 200
+Dropout combo: 0.1
+Learning rate: 0.1
+Weight decay: 1e-05
+Epoch loss after epoch 5: 145.2647933959961
+
+Epoch loss after epoch 10: 141.77238750457764
+
+Epoch loss after epoch 15: 134.5036506652832
+
+Epoch loss after epoch 20: 130.46316146850586
+
+Validation R^2: 0.74910185326
+
+
+Hidden size conv: 50
+Kernel size: 5
+Hidden size full: 200
+Dropout full: 0.1
+Hidden size combo: 200
+Dropout combo: 0.1
+Learning rate: 0.1
+Weight decay: 1e-05
+Epoch loss after epoch 5: 163.66230297088623
+
+Epoch loss after epoch 10: 146.04001140594482
+
+Epoch loss after epoch 15: 158.8881072998047
+
+Epoch loss after epoch 20: 134.0002841949463
+
+Validation R^2: 0.763720010427
+
+
+Best validation R^2: 0.763720010427
+Best hidden size conv: 50
+Best kernel size: 5
+Best hidden size full: 200
+Best dropout full: 0.1
+Best hidden size combo: 200
+Best dropout combo: 0.1
+Best learning rate: 0.1
+Best weight decay: 1e-05
