@@ -165,7 +165,7 @@ def r2(cnn, batch_size, x_stack_nonConst, x_tuple, y_tuple, get_pred=False):
         -- Length of x_tuple, length of y_tuple, and 0th dimension of x_stack_nonConst must be equal
         -- 0th dimension of each 2D matrix in x_tuple, length of each vector in y_tuple, and 2nd dimension of
         x_stack_nonConst must be equal
-        -- 2D matrices along 1st dimension of x_stack_nonConst, matrices in x_tuple, and vectors in y_tuple
+        -- 2D matrices along 0th dimension of x_stack_nonConst, matrices in x_tuple, and vectors in y_tuple
         should correspond to the same site sequences
         - get_pred (boolean): Default is false; set to True if predictions are desired
     -----------
@@ -231,7 +231,7 @@ def train_CNN(x_stack_nonConst, x_tuple, y_tuple, cnn, optimizer, loss, num_epoc
         -- Length of x_tuple, length of y_tuple, and 0th dimension of x_stack_nonConst must be equal
         -- 0th dimension of each 2D matrix in x_tuple, length of each vector in y_tuple, and 2nd dimension of
         x_stack_nonConst must be equal
-        -- 2D matrices along 1st dimension of x_stack_nonConst, matrices in x_tuple, and vectors in y_tuple
+        -- 2D matrices along 0th dimension of x_stack_nonConst, matrices in x_tuple, and vectors in y_tuple
         should correspond to the same site sequences
         - get_pred (boolean): Default is false; set to True if predictions are desired
         - cnn (torch model): CNN used to make predictions

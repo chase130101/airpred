@@ -5,7 +5,9 @@ due to the memory that saving requires.
 
 The script then imputes the missing data in either the train/test sets or train/validation/test 
 sets using the fitted random forest regression imputer and evaluates the random forest imputation 
-models. The imputed datasets are saved along with the imputation model evaluations.
+models. The imputed datasets are saved along with the imputation model evaluations. Included in the 
+model evaluations is a weighted R^2, which is weighted average of the R^2 associated with each imputed 
+variable where the weights are based on amount of missingness.
 """
 import argparse
 import configparser
@@ -148,9 +150,7 @@ train_imp_df = train_imp_df.reset_index().sort_values(["site", "index"])
 train_imp_df.drop("index", axis=1, inplace=True)
 train_imp_df.reset_index(inplace=True, drop=True)
 
-# save evaluations and imputed train and test datasets
-train_imp_df.to_csv(config["RF_Imputation"]["train"], index=False)
-test_imp_df.to_csv(config["RF_Imputation"]["test"], index=False)
+# save evaluations
 #pickle.dump(rf_imputer, open("rfV_imputer.pkl", "wb"))
 
 
@@ -171,8 +171,10 @@ if args.val:
                                                   val_x_imp], axis=1),
                                                   columns=cols)
 
-    # save imputed val dataset
-    val_imp_df.to_csv(config["RF_Imputation"]["val"], index=False)
+    # save imputed datasets
+    train_imp_df.to_csv(config["RF_Imputation"]["trainV"], index=False)
+    val_imp_df.to_csv(config["RF_Imputation"]["valV"], index=False)
+    test_imp_df.to_csv(config["RF_Imputation"]["testV"], index=False)
 
     # put R^2 evaluations for train, val, and test datasets into same pandas dataframe
     r2_scores_df = pd.concat([var_df, train1_r2_scores_df, train2_r2_scores_df, val_r2_scores_df, test_r2_scores_df], axis=1)
@@ -182,6 +184,9 @@ if args.val:
 
 
 else:
+    train_imp_df.to_csv(config["RF_Imputation"]["train"], index=False)
+    test_imp_df.to_csv(config["RF_Imputation"]["test"], index=False)
+
     # put R^2 evaluations for train and test datasets into same pandas dataframe and save
     r2_scores_df = pd.concat([var_df, train1_r2_scores_df, train2_r2_scores_df, test_r2_scores_df], axis=1)
     r2_scores_df.to_csv(config["RF_Imputation"]["r2_scores"], index=False)

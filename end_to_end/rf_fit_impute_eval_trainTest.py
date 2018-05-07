@@ -5,7 +5,9 @@ due to the memory that saving requires.
 
 The script then imputes the missing data in either the train/test sets using the fitted random forest
 regression imputer and evaluates the random forest imputation models using R^2. The imputed datasets 
-are saved along with the imputation model evaluations.
+are saved along with the imputation model evaluations. Included in the model evaluations is a weighted 
+R^2, which is weighted average of the R^2 associated with each imputed variable where the weights are based 
+on amount of missingness.
 """
 import pandas as pd
 import numpy as np

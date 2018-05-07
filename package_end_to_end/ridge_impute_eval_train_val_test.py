@@ -1,7 +1,9 @@
 """Description: This script imputes the missing data in either the train/test sets
 or train/validation/test sets using a fitted ridge regression imputer and evaluates
 the ridge imputation models. The imputed datasets are saved along with the imputation
-model evaluations.
+model evaluations. Included in the model evaluations is a weighted R^2, which is weighted 
+average of the R^2 associated with each imputed variable where the weights are based on 
+amount of missingness.
 """
 import argparse
 import configparser
@@ -78,9 +80,6 @@ test_imp_df = pd.DataFrame(np.concatenate([test_sites.values.reshape(len(test_si
 
 var_df = pd.DataFrame(np.array(cols[2:] + ["Weighted_Mean_R2"]).reshape(len(cols)-2+1, -1), columns=["Variable"])
 
-# save imputed train and test datasets
-train_imp_df.to_csv(config["Ridge_Imputation"]["train"], index=False)
-test_imp_df.to_csv(config["Ridge_Imputation"]["test"], index=False)
 
 
 if args.val:
@@ -99,8 +98,10 @@ if args.val:
                                                   val_y.values.reshape(len(val_y), -1),
                                                   val_x_imp], axis=1),
                                                   columns=cols)
-    # save imputed val dataset
-    val_imp_df.to_csv(config["Ridge_Imputation"]["val"], index=False)
+    # save imputed datasets
+    train_imp_df.to_csv(config["Ridge_Imputation"]["trainV"], index=False)
+    test_imp_df.to_csv(config["Ridge_Imputation"]["testV"], index=False)
+    val_imp_df.to_csv(config["Ridge_Imputation"]["valV"], index=False)
     
     # put R^2 evaluations for train, val, and test datasets into same pandas dataframe
     r2_scores_df = pd.concat([var_df, train_r2_scores_df, val_r2_scores_df, test_r2_scores_df], axis=1)
@@ -109,6 +110,9 @@ if args.val:
     r2_scores_df.to_csv(config["Ridge_Imputation"]["r2_scores"], index=False)
 
 else:
+    # save imputed train and test datasets
+    train_imp_df.to_csv(config["Ridge_Imputation"]["train"], index=False)
+    test_imp_df.to_csv(config["Ridge_Imputation"]["test"], index=False)
     # put R^2 evaluations for train and test datasets into same pandas dataframe and save
     r2_scores_df = pd.concat([var_df, train_r2_scores_df, test_r2_scores_df], axis=1)
     r2_scores_df.to_csv(config["Ridge_Imputation"]["r2_scores"], index=False)
