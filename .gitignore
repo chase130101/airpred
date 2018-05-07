@@ -49,3 +49,4 @@ data/test_cnn2Pred_rfImp.csv
 *ridgeImp.pkl
 *rfImp.pkl
 data/test_cnn2Pred_rfImp.csv
+data/test_ensemblePred_rfImp.csv
