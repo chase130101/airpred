@@ -6,7 +6,8 @@
 *.ipynb
 *.ipynb_checkpoints
 *__pycache__
-*.pkl
+*best*.pkl
+*imputer*.pkl
 data/assembled_data*
 data/census_data.csv
 data/train_ridgeImp.csv
