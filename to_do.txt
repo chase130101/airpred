@@ -2,5 +2,5 @@ Still to do:
 - Installation scripts and script usage instructions (detailed README)
 - Create website
 - Create Jupyter notebook tutorial
-- Fix/test code pipeline
+- Test code pipeline
 - Create final presentation slides

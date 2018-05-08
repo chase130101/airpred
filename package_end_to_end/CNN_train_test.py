@@ -48,15 +48,15 @@ train, val, test = None, None, None
 
 
 if args.dataset == "ridgeImp":
-    train = pd.read_csv(config["RidgeImputation"]["train"])
-    val   = pd.read_csv(config["RidgeImputation"]["val"])
-    test  = pd.read_csv(config["RidgeImputation"]["test"])
+    train = pd.read_csv(config["Ridge_Imputation"]["trainV"])
+    val   = pd.read_csv(config["Ridge_Imputation"]["valV"])
+    test  = pd.read_csv(config["Ridge_Imputation"]["testV"])
 
 
 elif args.dataset == "rfImp":
-    train = pd.read_csv(config["RF_Imputation"]["train"])
-    val   = pd.read_csv(config["RF_Imputation"]["val"])
-    test  = pd.read_csv(config["RF_Imputation"]["test"])
+    train = pd.read_csv(config["RF_Imputation"]["trainV"])
+    val   = pd.read_csv(config["RF_Imputation"]["valV"])
+    test  = pd.read_csv(config["RF_Imputation"]["testV"])
 
 
 # combine train and validation sets into train set
