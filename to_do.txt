@@ -1,8 +1,6 @@
 Still to do:
 - Installation scripts and script usage instructions (detailed README)
-- Get results for CNN
-- Add code comments and descriptions
-- Create poster/website
-- Create Jupyter notebook tutorial
+- Website
+- Jupyter notebook tutorial
 - Test code pipeline
-- Create final presentation slides
+- Final presentation slides

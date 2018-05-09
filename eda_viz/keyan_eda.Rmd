@@ -1,0 +1,154 @@
+---
+title: "CSE Capstone - HSPH EDA"
+author: "Keyan Halperin"
+date: "February 11, 2018"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r, warning = F, message = F}
+library(tidyverse)
+library(lubridate)
+library(psych)
+```
+
+
+```{r}
+data = read.csv('random_subset.csv', stringsAsFactors = F)
+
+#67,000 observations, 116 variables
+dim(data)
+
+data$date = as.Date(data$date)
+data$month = month(data$date)
+```
+
+```{r}
+#Proportion of missing values by variable
+missing.table = sapply(data, function(x) round( mean(is.na(x)), 4))
+sort(missing.table, decreasing = T)[1:40] #78% of monitor data is missing
+
+```
+
+```{r}
+range(data$site)
+
+#All 2156 sites are accounted for in this subset
+length(unique(data$site))
+
+#Each site has at least 15 observations, at most 48
+data %>% count(site) %>% summarize(min_count = min(n), avg_count = mean(n), max_count = max(n))
+
+
+#Sites with lowest avg pollution 
+data %>% group_by(site) %>% summarize(avg_pollution = mean(MonitorData, na.rm = T)) %>% 
+  arrange(avg_pollution) %>% slice(1:10)
+
+#Sites with highest avg pollution 
+data %>% group_by(site) %>% summarize(avg_pollution = mean(MonitorData, na.rm = T)) %>% 
+  arrange(desc(avg_pollution)) %>% slice(1:10)
+```
+
+
+```{r}
+#Monitor Data
+describe(data$MonitorData, skew = F)
+ggplot(data, aes(MonitorData)) + 
+  geom_histogram(col = 'black') +
+    ggtitle('Pollution Distribution')
+```
+
+**Data appears to be consistent over time**
+```{r}
+#Date range
+range(data$date)
+
+#Number of observations by year
+data %>% count(year)
+
+#Proportion of missing monitor data by year
+data %>% group_by(year) %>% summarize(missing.monitor = mean(is.na(MonitorData)))
+
+#Number of observations by month
+data %>% count(month)
+
+#Proportion of missing monitor data by month
+data %>% group_by(month) %>% summarize(missing.monitor = mean(is.na(MonitorData)))
+```
+
+```{r}
+#PM2.5 appears to be going down over time!
+data %>% group_by(year) %>% summarize(avg_pollution = mean(MonitorData, na.rm = T))
+
+#PM2.5 levels also seem to vary by month
+data %>% group_by(month) %>% summarize(avg_pollution = mean(MonitorData, na.rm = T))
+
+```
+
+```{r}
+ggplot(data, aes(x = factor(year), y = MonitorData)) + 
+  stat_summary(fun.y = 'mean', geom = 'bar', fill = 'red') +
+    ggtitle('Average Pollution over Time') + xlab('Year') + ylab('PM2.5')
+
+ggplot(data, aes(x = factor(year), y = MonitorData, fill = factor(year))) + 
+  geom_boxplot() + theme(legend.position = 'none') + ylim(0, 65) +
+    ggtitle('Pollution over Time') + xlab('Year') + ylab('PM2.5')
+```
+
+```{r}
+ggplot(data, aes(x = factor(month), y = MonitorData)) + 
+  stat_summary(fun.y = 'mean', geom = 'bar', fill = 'red') +
+    ggtitle('Average Pollution by Month') + xlab('Month') + ylab('PM2.5')
+
+#Time Series of average PM2.5 levels by day over time 
+ggplot(data, aes(x = date, y = MonitorData)) + 
+  stat_summary(fun.y = 'mean', geom = 'line', size = .5) +
+    ylab('PM2.5') + ggtitle('Pollution over Time')
+```
+
+**We will now explore the relationship between the various covariates and the PM2.5 monitor data**
+```{r}
+#Remove rows with missing monitor data and remove non-predictor variables
+monitor.na.omit = data %>% filter(!is.na(MonitorData)) %>% select(-c(site:date, month))
+
+#Look at correlation between each predictor and PM2.5 monitor data
+num.cols = ncol(monitor.na.omit)
+cors = matrix(rep(NA, 3*num.cols), nrow = num.cols)
+colnames(cors) = c('variable', 'correlation', 'num.complete.cases')
+
+for(i in 2:num.cols){
+  
+  monitor.na.omit2 = na.omit(monitor.na.omit[, c(1,i)])
+  cors[i,2] = cor(monitor.na.omit2$MonitorData, monitor.na.omit2[,2])
+  
+  n = nrow(monitor.na.omit2)
+  cors[i,3] = n
+  #cors[i,4] = round(n/nrow(data), 3)
+  
+}
+
+cors = as.data.frame(cors)
+cors[,1] = names(monitor.na.omit)
+```
+
+```{r}
+
+#Variables with that are most correlated with PM2.5
+cors %>% arrange(desc(abs(correlation))) %>% slice(1:20)
+```
+
+```{r}
+ggplot(monitor.na.omit, aes(x = Nearby_Peak2_PM25, y = MonitorData)) + geom_point() +
+  ggtitle('PM2.5 MonitorData vs. Nearby Peak PM2.5') + geom_smooth()
+
+ggplot(monitor.na.omit, aes(x = MAIACUS_Optical_Depth_047_Terra_Nearest4, y = MonitorData)) + 
+  geom_point() + ggtitle('PM2.5 MonitorData vs. Aerosol Optical Depth')
+
+ggplot(monitor.na.omit, aes(x = Nearby_Peak2_NO2, y = MonitorData)) + 
+  geom_point() + ggtitle('PM2.5 MonitorData vs. Nearby Peak NO2')
+```
+

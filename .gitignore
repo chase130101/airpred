@@ -6,7 +6,8 @@
 *.ipynb
 *.ipynb_checkpoints
 *__pycache__
-*.pkl
+*best*.pkl
+*imputer*.pkl
 data/assembled_data*
 data/census_data.csv
 data/train_ridgeImp.csv
@@ -44,3 +45,8 @@ data/test_xgboostPred_ridgeImp.csv
 data/xgboost_feature_importances_ridgeImp.csv
 data/test_olsPred_rfImp.csv
 data/sensor_data.csv
+data/test_cnn2Pred_rfImp.csv
+*ridgeImp.pkl
+*rfImp.pkl
+data/test_cnn2Pred_rfImp.csv
+data/test_ensemblePred_rfImp.csv
