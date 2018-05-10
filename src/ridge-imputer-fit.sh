@@ -6,4 +6,4 @@
 #SBATCH -t 0-02:00 # time (D-HH:MM)
 #SBATCH -o slurm.ridgeImputerFit.%N.%j.out # STDOUT
 #SBATCH -e slurm.ridgeImputerFit.%N.%j.err # STDERR
-python ridge_imputer_fit.py
+python ridge_imputer_fit.py --val --impute_split 0.3 --max_iter 10 --initial_strategy mean --alpha 0.0001 
