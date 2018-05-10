@@ -21,9 +21,9 @@ and (3) the general software pipeline, and how to run each component.
 ####################################################################
 (1) Hardware + Software Infrastructure
 We used Harvard's Odyssey Supercomputing cluster to run our scripts. 
-Within Odyssey, we tended to use the   machines.
+Within Odyssey, we tended to use the 'shared' machines.
 
-Most of our work was done in Python 3.6, with some preprocessing in R.
+Most of our work was done in Python 3.6, with some pre-processing in R.
 
 ####################################################################
 (2) Dependencies
@@ -48,7 +48,7 @@ source activate my_root
 
 The middle line can be substituted with any conda install.
 
-Below is a list of Python packages we used heavily. A * indicates that the package comes 
+Below is a list of Python packages that we used heavily. A * indicates that the package comes 
 with Python 3 by default., and a ** indicates that the package comes with conda by
 default:
 
@@ -92,11 +92,11 @@ We have provided Slurm scripts that run our pipeline on Odyssey.
 
 Our software pipeline is structured in the following order. We have also listed the corresponding scripts for each step:
 
-- Preprocess + Train/Val/Test Split Census and Satellite data and save to separate files
+- Preprocess + Train/Val/Test Split data and save to separate files
     * data-setup.sh
     * tvt-split.sh
     
-- Run Ridge or Random Forest imputation on the split data
+- Run ridge or random forest imputation on the split data
     * ridge-impute-tvt.sh
     * rf-impute-tvt.sh
 
