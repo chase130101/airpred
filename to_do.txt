@@ -3,4 +3,3 @@ Still to do:
 - Website
 - Jupyter notebook tutorial
 - Test code pipeline
-- Final presentation slides
