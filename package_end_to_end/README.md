@@ -16,7 +16,7 @@ Introduction:
 
 This README details the software we wrote for our capstone project. 
 It describes (1) the infrastructure used, (2) how to configure dependencies,
-(3) the general software pipeline, and (4) how to run each component.
+and (3) the general software pipeline, and how to run each component.
 
 ####################################################################
 (1) Hardware + Software Infrastructure
