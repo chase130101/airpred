@@ -4,6 +4,6 @@
 #SBATCH -n 32 # number of cores
 #SBATCH --mem 100000 # memory pool for all cores
 #SBATCH -t 0-03:00 # time (D-HH:MM)
-#SBATCH -o slurm.rfTT.%N.%j.out # STDOUT
-#SBATCH -e slurm.rfTT.%N.%j.err # STDERR
-python rf_trainTest.py
+#SBATCH -o slurm.rfCrossVal.%N.%j.out # STDOUT
+#SBATCH -e slurm.rfCrossVal.%N.%j.err # STDERR
+python model_cross_validation.py --model ridge --n_folds 4 --dataset ridgeImp

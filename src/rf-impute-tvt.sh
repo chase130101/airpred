@@ -6,4 +6,4 @@
 #SBATCH -t 0-12:00 # time (D-HH:MM)
 #SBATCH -o slurm.rfImputeTVT.%N.%j.out # STDOUT
 #SBATCH -e slurm.rfImputeTVT.%N.%j.err # STDERR
-python rf_fit_impute_eval_trainValTest.py
+python rf_fit_impute_eval_train_val_test.py --val --impute_split 0.23 --initial_strategy mean --backup_strategy mean --max_iter 10 

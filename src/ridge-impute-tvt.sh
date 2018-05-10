@@ -6,4 +6,4 @@
 #SBATCH -t 0-03:00 # time (D-HH:MM)
 #SBATCH -o slurm.ridgeImputeTVT.%N.%j.out # STDOUT
 #SBATCH -e slurm.ridgeImputeTVT.%N.%j.err # STDERR
-python ridge_impute_eval_trainValTest.py
+python ridge_impute_eval_train_val_test.py --val --backup_strategy mean
