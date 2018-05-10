@@ -52,16 +52,16 @@ Below is a list of Python packages we used heavily. A * indicates that the packa
 with Python 3 by default., and a ** indicates that the package comes with conda by
 default:
 
-argparse
-configparser*
-numpy**
-pandas**
-pickle*
-sklearn**
-torch
-xgboost
+-argparse
+-configparser*
+-numpy**
+-pandas**
+-pickle*
+-sklearn**
+-torch
+-xgboost
 
-See https://anaconda.org/ for more information on individual packages.
+All unmarked packages can be installed through conda. See https://anaconda.org/ for more information on individual packages.
 
 *R Dependencies*
 For a small portion of our pipeline, we also had to use R packages. We can install
@@ -74,12 +74,15 @@ module load R/3.3.3-fasrc01
 export R_LIBS_USER=$HOME/apps/R:$R_LIBS_USER
 ---------------------------------------------------
 
-The second line can be put in the user's .bashrc file for convenience.
+The second line specifies that we want to save packages locally, and can be put in the user's .bashrc file for convenience.
+
+After this step, one can run `R` and use the `install.packages()` command to 
+save package binaries to the local directory.
 
 The packages we need for the R code are:
 
-dpylr
-data.table
+-dpylr
+-data.table
 
 
 ####################################################################
