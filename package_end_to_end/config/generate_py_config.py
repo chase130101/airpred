@@ -18,9 +18,9 @@ config["data"] = {
 config["RF_Imputation"] = {
              'train'                 : '../data/train_rfImp.csv',
              'test'                  : '../data/test_rfImp.csv',
-             'trainV'                 : '../data/trainV_rfImp.csv',
-             'valV'                   : '../data/valV_rfImp.csv',
-             'testV'                  : '../data/testV_rfImp.csv',
+             'trainV'                : '../data/trainV_rfImp.csv',
+             'valV'                  : '../data/valV_rfImp.csv',
+             'testV'                 : '../data/testV_rfImp.csv',
              'r2_scores'             : '../data/r2_scores_rfImp.csv',
 }
 
@@ -28,9 +28,9 @@ config["RF_Imputation"] = {
 config["Ridge_Imputation"] = {
              'train'                 : '../data/train_ridgeImp.csv',
              'test'                  : '../data/test_ridgeImp.csv',
-             'trainV'                 : '../data/trainV_ridgeImp.csv',
-             'valV'                   : '../data/valV_ridgeImp.csv',
-             'testV'                  : '../data/testV_ridgeImp.csv',
+             'trainV'                : '../data/trainV_ridgeImp.csv',
+             'valV'                  : '../data/valV_ridgeImp.csv',
+             'testV'                 : '../data/testV_ridgeImp.csv',
              'r2_scores'             : '../data/r2_scores_ridgeImp.csv',
              'model'                 : 'ridge_imputer.pkl'
 }

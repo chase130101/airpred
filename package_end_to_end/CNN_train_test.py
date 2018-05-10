@@ -127,15 +127,15 @@ input_size_full = train_x_std_all.shape[1]
 
 # train/test CNN1
 if args.cnn_type == "cnn_1":
-    hidden_size_conv  = config["CNN_hyperparam_1"]["hidden_size_conv"]
-    kernel_size       = config["CNN_hyperparam_1"]["kernel_size"]
-    padding           = config["CNN_hyperparam_1"]["padding"]
-    hidden_size_full  = config["CNN_hyperparam_1"]["hidden_size_full"]
-    dropout_full      = config["CNN_hyperparam_1"]["dropout_full"]
-    hidden_size_combo = config["CNN_hyperparam_1"]["hidden_size_combo"]
-    dropout_combo     = config["CNN_hyperparam_1"]["dropout_combo"]
-    lr                = config["CNN_hyperparam_1"]["lr"]
-    weight_decay      = config["CNN_hyperparam_1"]["weight_decay"]
+    hidden_size_conv  = float(config["CNN_hyperparam_1"]["hidden_size_conv"])
+    kernel_size       = float(config["CNN_hyperparam_1"]["kernel_size"])
+    padding           = float(config["CNN_hyperparam_1"]["padding"])
+    hidden_size_full  = float(config["CNN_hyperparam_1"]["hidden_size_full"])
+    dropout_full      = float(config["CNN_hyperparam_1"]["dropout_full"])
+    hidden_size_combo = float(config["CNN_hyperparam_1"]["hidden_size_combo"])
+    dropout_combo     = float(config["CNN_hyperparam_1"]["dropout_combo"])
+    lr                = float(config["CNN_hyperparam_1"]["lr"])
+    weight_decay      = float(config["CNN_hyperparam_1"]["weight_decay"])
 
     # Loss function
     mse_loss = torch.nn.MSELoss(size_average=True)
@@ -179,15 +179,16 @@ if args.cnn_type == "cnn_1":
 
 # train/test CNN2
 else:
-    hidden_size_conv  = config["CNN_hyperparam_2"]["hidden_size_conv"]
-    kernel_size       = config["CNN_hyperparam_2"]["kernel_size"]
-    padding           = config["CNN_hyperparam_2"]["padding"]
-    hidden_size_full  = config["CNN_hyperparam_2"]["hidden_size_full"]
-    dropout_full      = config["CNN_hyperparam_2"]["dropout_full"]
-    hidden_size2_full = config["CNN_hyperparam_2"]["hidden_size2_full"]
-    dropout2_full     = config["CNN_hyperparam_2"]["dropout2_full"]
-    lr                = config["CNN_hyperparam_2"]["lr"]
-    weight_decay      = config["CNN_hyperparam_2"]["weight_decay"]
+    hidden_size_conv  = float(config["CNN_hyperparam_2"]["hidden_size_conv"])
+    kernel_size       = float(config["CNN_hyperparam_2"]["kernel_size"])
+    padding           = float(config["CNN_hyperparam_2"]["padding"])
+    hidden_size_full  = float(config["CNN_hyperparam_2"]["hidden_size_full"])
+    dropout_full      = float(config["CNN_hyperparam_2"]["dropout_full"])
+    hidden_size2_full = float(config["CNN_hyperparam_2"]["hidden_size2_full"])
+    dropout2_full     = float(config["CNN_hyperparam_2"]["dropout2_full"])
+    lr                = float(config["CNN_hyperparam_2"]["lr"])
+    weight_decay      = float(config["CNN_hyperparam_2"]["weight_decay"])
+
 
     # Loss function
     mse_loss = torch.nn.MSELoss(size_average=True)
