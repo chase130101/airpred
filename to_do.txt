@@ -1,5 +1,0 @@
-Still to do:
-- Installation scripts and script usage instructions (detailed README)
-- Website
-- Jupyter notebook tutorial
-- Test code pipeline
