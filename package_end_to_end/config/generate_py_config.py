@@ -45,9 +45,33 @@ config["Regression"] = {
              'ridge_pred'            : '../data/test_ridgePred.csv',
              'ridge_final'           : 'ridge_final.pkl',
              'rf_pred'               : '../data/test_rfPred.csv',
-             'rf_fti'                 : '../data/rf_feature_importances.csv',
+             'rf_fti'                : '../data/rf_feature_importances.csv',
              'xgb_pred'              : '../data/test_xgboostPred.csv',
-             'xgb_fti'                : '../data/xgboost_feature_importances.csv',      
+             'xgb_fti'               : '../data/xgboost_feature_importances.csv',      
+}
+
+config["CNN_hyperparam_1"] = { 
+             'hidden_size_conv'      : 50,
+             'kernel_size'           : 5,
+             'padding'               : 1,
+             'hidden_size_full'      : 100,
+             'dropout_full'          : 0.1,
+             'hidden_size_combo'     : 100,
+             'dropout_combo'         : 0.1,
+             'lr'                    : 0.1,
+             'weight_decay'          : 0.00001
+}
+
+config["CNN_hyperparam_2"] = { 
+             'hidden_size_conv'      : 25,
+             'kernel_size'           : 3,
+             'padding'               : 1,
+             'hidden_size_full'      : 100,
+             'dropout_full'          : 0.1,
+             'hidden_size2_full'     : 100,
+             'dropout2_full'         : 0.1,
+             'lr'                    : 0.1,
+             'weight_decay'          : 0.00001
 }
 
 
