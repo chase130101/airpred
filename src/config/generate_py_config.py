@@ -42,6 +42,10 @@ config["Reg_Best_Hyperparams"] = {
 }
 
 config["Regression"] = {
+             'cnn_1_model'           : 'cnn_1_model.pkl',
+             'cnn_1_pred'            : 'cnn_1_pred.csv',
+             'cnn_2_model'           : 'cnn_2_model.pkl',
+             'cnn_2_pred'            : 'cnn_2_pred.csv',
              'ridge_pred'            : '../data/test_ridgePred.csv',
              'ridge_final'           : 'ridge_final.pkl',
              'rf_pred'               : '../data/test_rfPred.csv',
