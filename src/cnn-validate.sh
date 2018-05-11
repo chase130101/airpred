@@ -3,7 +3,7 @@
 #SBATCH -N 1 # number of nodes
 #SBATCH -n 1 # number of cores
 #SBATCH --mem 100000 # memory pool for all cores
-#SBATCH -t 0-05:00 # time (D-HH:MM)
+#SBATCH -t 2-00:00 # time (D-HH:MM)
 #SBATCH -o slurm.cnnVal.%N.%j.out # STDOUT
 #SBATCH -e slurm.cnnVal.%N.%j.err # STDERR
-python CNN_validate.py --cnn_type cnn_1 --dataset ridgeImp
+python CNN_validate.py --cnn_type cnn_2 --dataset ridgeImp
