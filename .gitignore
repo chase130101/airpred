@@ -3,7 +3,7 @@
 .RData
 .Ruserdata
 .DS_Store
-*.ipynb
+
 *.ipynb_checkpoints
 *__pycache__
 *best*.pkl
