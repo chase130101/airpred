@@ -88,15 +88,15 @@ The packages we need for the R code are:
 ####################################################################
 (3) Software Pipeline/How to Run our Code
 
-Data
+Data:
 
-There are three data files located on our GitHub located in the data folder.
+There are three data files located on our GitHub located in the data directory.
 
-1. `sensor_locations_with_census.csv` is the only file that is actually needed, and is used to run `data_setup.R.` It contains each sensor id, longitude, and lattitude joined with the corresponding preprocessed census data
+1. `sensor_locations_with_census.csv` is the only file that is actually needed, and is used to run `data_setup.R`. It contains each site ID, longitude, and latitude joined with the corresponding pre-processed census data.
 
-2. `raw_census_data_by_zip.zip` is the unprocessed census data by ZIP code in .xlsx format as given to us by IACS.
+2. `raw_census_data_by_zip.zip` contains the unprocessed census data by ZIP code in .xlsx format given to us by IACS.
 
-3. `census_data_csv_formatted.zip` is file 2. reformatted to be in .csv format
+3. `census_data_csv_formatted.zip` contains the file in `raw_census_data_by_zip.zip` reformatted to be in .csv format.
 	     
 
 
