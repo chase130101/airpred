@@ -25,11 +25,11 @@ config.read("config/py_config.ini")
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument("cnn_type", 
+parser.add_argument("--cnn_type", 
     help = "Specify which of the two CNN architectures to use. The options are \"cnn_1\" and \"cnn_2\".",
     choices = ["cnn_1", "cnn_2"])
 
-parser.add_argument("dataset",
+parser.add_argument("--dataset",
     help = "Specify which imputed dataset to use. " + \
     "Options are ridge-imputed (\"ridgeImp\") and random-forest imputed (\"rfImp\").",
     choices=["ridgeImp", "rfImp"]) 
