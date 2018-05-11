@@ -92,7 +92,7 @@ Data:
 
 There are three data files located on our GitHub located in the data directory.
 
-1. `sensor_locations_with_census.csv` is the only file that is actually needed, and is used to run `data_setup.R`. It contains each site ID, longitude, and latitude joined with the corresponding pre-processed census data.
+1. `sensor_locations_with_census.csv` is the only file that is actually needed, and is used to run `data_setup.R`. It contains each site ID, longitude, and latitude joined with the corresponding processed census data.
 
 2. `raw_census_data_by_zip.zip` contains the unprocessed census data by ZIP code in .xlsx format given to us by IACS.
 
@@ -129,3 +129,10 @@ As a rule of thumb, all directory configurations are stored in the config direct
 Another type of parameter specified in `py_config.ini` is CNN hyperparameters. Although most of our model parameters are specified through command line arguments, we thought that the number of parameters to set in the CNN code would make it difficult to customize through the command line, and therefore elected to put them in the config.
 
 The Slurm scripts are kicked off on an Odyssey login node and allocated to worker nodes. However, it suffices to have the dependencies available in the user home directory. Odyssey automatically looks for them when running jobs.
+
+############################################################################################
+Tutorial 
+########
+The tutorial directory of our repository simulates a miniature version of our code pipeline. First, enter /tutorial/data and unzip each individual data file. Then, enter /data/pipeline_end_to_end (which is effectively the /src file in the higher directory) and find two python notebooks there: one which demonstrates training our CNNs, and the other demonstrates training non-CNN models (i.e. ridge regression, random forest, and XGBoost). 
+
+Each tutorial runs through our entire pipeline, demonstrating how to impute the data, optimize model hyperparameters, and train the model. The tutorials uses a 100 day subset of the input data, such that it can be run with minimal computing resources. The objective of the tutorial is to show the flow of the software pipeline and to expose the code of our top-level scripts. However, in practice, this code does not need to be touched, all scripts can be run in the command line using our shell scripts. Which shell scripts to run is explained in the tutorial.  
