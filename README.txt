@@ -3,7 +3,7 @@ README file for HSPH Capstone Project Spring 2018
 AC297r, Harvard Institute for Applied Computational Science (IACS)
 
 *Keyan Halperin (keyan_halperin@g.harvard.edu) (Statistics)
-*Chris Hase (christopher_hase@g.harvard.edu)   (Statatics)
+*Chris Hase (christopher_hase@g.harvard.edu)   (Statistics)
 *Justin Lee (justin_s_lee@g.harvard.edu)       (CSE)
 *Casey Meehan (casey_meehan@g.harvard.edu)     (CSE)
 
