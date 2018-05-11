@@ -22,7 +22,7 @@ config.read("config/py_config.ini")
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model", 
+parser.add_argument("model", 
     help = "Specify which model to evaluate via cross-validation. " +\
     "Options are Ridge (\"ridge\"), Random Forest (\"rf\"), and XGBoost (\"xgb\").",
     choices=["ridge", "rf", "xgb"])
@@ -32,7 +32,7 @@ parser.add_argument("--n_folds",
     type=int,
     default=4)
 
-parser.add_argument("--dataset",
+parser.add_argument("dataset",
     help = "Specify which imputed dataset to use. " + \
     "Options are ridge-imputed (\"ridgeImp\") and random-forest imputed (\"rfImp\").",
     choices=["ridgeImp", "rfImp"]) 

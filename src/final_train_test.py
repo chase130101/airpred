@@ -26,14 +26,16 @@ config.read("config/py_config.ini")
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model", 
+parser.add_argument("model", 
     help = "Specify which model to evaluate a train/test split on. " +\
-    "Options are Ridge (\"ridge\"), Random Forest (\"rf\"), and XGBoost (\"xgb\").")
+    "Options are Ridge (\"ridge\"), Random Forest (\"rf\"), and XGBoost (\"xgb\").",
+    choices = models)
 
 
-parser.add_argument("--dataset",
+parser.add_argument("dataset",
     help = "Specify which dataset to use. " + \
-    "Options are ridge-imputed (\"ridgeImp\") and random-forest imputed (\"rfImp\").") 
+    "Options are ridge-imputed (\"ridgeImp\") and random-forest imputed (\"rfImp\").",
+    choices = datasets) 
 
 args = parser.parse_args()
 
