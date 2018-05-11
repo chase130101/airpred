@@ -21,7 +21,7 @@ and (3) the general software pipeline, and how to run each component.
 ####################################################################
 (1) Hardware + Software Infrastructure
 We used Harvard's Odyssey Supercomputing cluster to run our scripts. 
-Within Odyssey, we tended to use the 'shared' machines.
+Within Odyssey, we tended to use the shared partition.
 
 Most of our work was done in Python 3.6, with some pre-processing in R.
 
@@ -83,7 +83,6 @@ The packages we need for the R code are:
 
 -dpylr
 -data.table
-
 
 ####################################################################
 (3) Software Pipeline/How to Run our Code
