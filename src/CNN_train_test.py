@@ -27,9 +27,7 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument("cnn_type", 
     help = "Specify which of the two CNN architectures to use. The options are \"cnn_1\" and \"cnn_2\".",
-    type=int,
-    choices = ["cnn_1", "cnn_2"]
-    default=4)
+    choices = ["cnn_1", "cnn_2"])
 
 parser.add_argument("dataset",
     help = "Specify which imputed dataset to use. " + \
