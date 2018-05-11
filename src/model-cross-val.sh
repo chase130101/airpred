@@ -6,4 +6,4 @@
 #SBATCH -t 0-24:00 # time (D-HH:MM)
 #SBATCH -o slurm.crossVal.%N.%j.out # STDOUT
 #SBATCH -e slurm.crossVal.%N.%j.err # STDERR
-python model_cross_validation.py --model ridge --n_folds 4 --dataset ridgeImp
+python model_cross_validation.py ridge 4 ridgeImp

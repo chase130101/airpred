@@ -6,4 +6,4 @@
 #SBATCH -t 0-03:00 # time (D-HH:MM)
 #SBATCH -o slurm.TT.%N.%j.out # STDOUT
 #SBATCH -e slurm.TT.%N.%j.err # STDERR
-python final_train_test.py --model ridge --dataset ridgeImp
+python final_train_test.py ridge ridgeImp

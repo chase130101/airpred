@@ -6,4 +6,4 @@
 #SBATCH -t 2-00:00 # time (D-HH:MM)
 #SBATCH -o slurm.cnnVal.%N.%j.out # STDOUT
 #SBATCH -e slurm.cnnVal.%N.%j.err # STDERR
-python CNN_validate.py --cnn_type cnn_2 --dataset ridgeImp
+python CNN_validate.py cnn_2 ridgeImp
