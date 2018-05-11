@@ -95,14 +95,19 @@ Our software pipeline is structured in the following order. We have also listed 
 - Preprocess + Train/Val/Test Split data and save to separate files
     * data-setup.sh
     * tvt-split.sh
-    
+    * 
+     
 - Run ridge or random forest imputation on the split data
+    * ridge-imputer-fit.sh
     * ridge-impute-tvt.sh
     * rf-impute-tvt.sh
 
 - Run models 
-    * ridge-tt.sh
-    * rf-tt.sh
+    * final-train-test.sh
+    * cnn-tt.sh
+    * cnn-validate.sh
+    * model-cross-val.sh
+
 
 To customize the parameters of the code, please make sure to look at the 
 command line arguments of the Python scripts in the Slurm scripts, as well as 
