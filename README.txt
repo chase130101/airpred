@@ -94,7 +94,6 @@ Our software pipeline is structured in the following order. We have also listed 
 - Preprocess + Train/Val/Test Split data and save to separate files
     * data-setup.sh
     * tvt-split.sh
-    * 
      
 - Run ridge or random forest imputation on the split data
     * ridge-imputer-fit.sh
