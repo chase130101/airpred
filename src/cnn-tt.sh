@@ -6,4 +6,4 @@
 #SBATCH -t 0-15:00 # time (D-HH:MM)
 #SBATCH -o slurm.cnnTT.%N.%j.out # STDOUT
 #SBATCH -e slurm.cnnTT.%N.%j.err # STDERR
-python CNN_train_test.py --cnn_type cnn_1 --dataset ridgeImp
+python CNN_train_test.py --cnn_type cnn_2 --dataset ridgeImp
